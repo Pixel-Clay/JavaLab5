@@ -1,11 +1,10 @@
 package clay.vehicle.vehicles;
 
+import java.time.ZonedDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -13,6 +12,7 @@ import java.time.ZonedDateTime;
 public class Vehicle implements Comparable<Vehicle> {
   @Setter(AccessLevel.NONE)
   private int id; // Значение поля должно быть больше 0, Значение этого поля должно быть уникальным,
+
   // Значение этого поля должно генерироваться автоматически
   private String name; // Поле не может быть null, Строка не может быть пустой
   private Coordinates coordinates; // Поле не может быть null
@@ -72,6 +72,7 @@ public class Vehicle implements Comparable<Vehicle> {
    */
   public int compareTo(Vehicle v) {
     return (int)
-        ((v.getEnginePower() - v.getDistanceTravelled()) - (this.enginePower - this.distanceTravelled));
+        ((v.getEnginePower() - v.getDistanceTravelled())
+            - (this.enginePower - this.distanceTravelled));
   }
 }

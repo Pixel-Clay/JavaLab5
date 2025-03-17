@@ -1,20 +1,23 @@
 package clay.vehicle;
 
 import clay.vehicle.vehicles.Vehicle;
-import java.util.HashMap;
+import java.util.*;
+import lombok.Getter;
 
 public class VehicleStorage {
-  HashMap<Integer, Vehicle> storage = new HashMap<>();
+  @Getter private HashMap<Integer, Vehicle> storage = new HashMap<>();
 
-  public void insert(Vehicle vehicle) {}
+  @Getter private ArrayList<Integer> license_plates = new ArrayList<>();
 
-  public Vehicle[] dumpElements() {
-    return null;
+  public void insert(Vehicle vehicle) {
+    this.storage.put(license_plates.get(license_plates.size() - 1), vehicle);
   }
 
   public Vehicle getElement(int id) {
-    return null;
+    return this.storage.get(id);
   }
 
-  public void setElement(int id, Vehicle vehicle) {}
+  public void setElement(int id, Vehicle vehicle) {
+    this.storage.put(id, vehicle);
+  }
 }
