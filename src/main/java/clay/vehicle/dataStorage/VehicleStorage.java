@@ -1,4 +1,4 @@
-package clay.vehicle;
+package clay.vehicle.dataStorage;
 
 import clay.vehicle.vehicles.Vehicle;
 import java.util.*;
