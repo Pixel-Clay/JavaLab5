@@ -3,7 +3,7 @@ package clay.vehicle.dataStorage;
 import java.io.*;
 import java.util.HashMap;
 
-public class CSVReader {
+public class CSVIO {
 
     public static HashMap<Integer, String[]> readCSV(String csvFile) throws IOException {
         HashMap<Integer, String[]> records = new HashMap<>();
