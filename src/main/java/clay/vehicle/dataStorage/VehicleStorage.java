@@ -1,20 +1,16 @@
 package clay.vehicle.dataStorage;
 
 import clay.vehicle.vehicles.Vehicle;
-
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.ZonedDateTime;
 import java.util.*;
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @JsonSerialize(using = VehicleStorageSerializer.class)
 public class VehicleStorage implements Comparable<VehicleStorage> {
 
-  @Getter
-  ZonedDateTime initDate;
+  @Getter ZonedDateTime initDate;
 
   public VehicleStorage() {
     this.initDate = ZonedDateTime.now();

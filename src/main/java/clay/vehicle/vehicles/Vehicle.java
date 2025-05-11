@@ -1,8 +1,7 @@
 package clay.vehicle.vehicles;
 
-import java.time.ZonedDateTime;
-
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import java.time.ZonedDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +16,7 @@ public class Vehicle implements Comparable<Vehicle> {
 
   // Значение этого поля должно генерироваться автоматически
   private String name; // Поле не может быть null, Строка не может быть пустой
-  @JsonUnwrapped
-  private Coordinates coordinates; // Поле не может быть null
+  @JsonUnwrapped private Coordinates coordinates; // Поле не может быть null
   private java.time.ZonedDateTime
       creationDate; // Поле не может быть null, Значение этого поля должно генерироваться
   // автоматически
