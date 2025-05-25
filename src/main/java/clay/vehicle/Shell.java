@@ -36,7 +36,7 @@ public class Shell {
 
     // handle EOF
     while (scanner.hasNextLine()) {
-      String line = scanner.nextLine();
+      String line = scanner.nextLine().strip();
       if (line.isEmpty()) return null;
       else return line;
     }

@@ -8,6 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Command implementation for executing a script file containing multiple commands. This command
@@ -31,13 +33,14 @@ public class ExecuteScript implements Executable {
 
   /**
    * Executes the execute_script command. Reads the specified script file and executes each command
-   * in sequence. The script file should contain one command per line.
+   * in sequence. The script file should contain one command per line. Recursion is not allowed.
    *
    * @param args command arguments, where args[0] is the path to the script file
    * @return a message indicating the result of script execution
    */
   @Override
   public String execute(String[] args) {
+    processor.clearQueue();
     Path path;
     String script;
     try {
@@ -60,9 +63,17 @@ public class ExecuteScript implements Executable {
       // Convert all bytes to a single String
       script = bos.toString();
 
+      Pattern pattern = Pattern.compile(path.getFileName().toString() + "\\z");
+
       for (String line : script.split("\n")) {
         line = line.strip();
         if (line.isEmpty()) continue;
+
+        if (line.contains("execute_script")) {
+          Matcher matcher = pattern.matcher(line);
+          if (matcher.find()) return "! Recursion not allowed";
+        }
+
         processor.addInstruction(line);
       }
 

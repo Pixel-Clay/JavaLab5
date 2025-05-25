@@ -39,6 +39,11 @@ public class CommandProcessor {
     System.out.println(instructions.toString());
   }
 
+  /** Clears the command queue */
+  public void clearQueue() {
+    instructions.clear();
+  }
+
   /**
    * Processes and executes all queued instructions. Each instruction is split into a command name
    * and its arguments. The command is looked up and executed with the provided arguments.
