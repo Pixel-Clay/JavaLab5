@@ -1,30 +1,60 @@
 package clay.vehicle.vehicles;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import jakarta.validation.constraints.*;
 import java.time.ZonedDateTime;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Represents a vehicle in the system. This class contains all the properties of a vehicle and
+ * implements validation constraints to ensure data integrity. It also implements Comparable for
+ * sorting vehicles by engine power.
+ */
 @Getter
 @Setter
 @ToString
 public class Vehicle implements Comparable<Vehicle> {
-  @Setter(AccessLevel.NONE)
+  /** Unique identifier of the vehicle. Must be positive and unique. */
+  @Setter @Positive
   private int id; // Значение поля должно быть больше 0, Значение этого поля должно быть уникальным,
 
   // Значение этого поля должно генерироваться автоматически
-  private String name; // Поле не может быть null, Строка не может быть пустой
-  @JsonUnwrapped private Coordinates coordinates; // Поле не может быть null
-  private java.time.ZonedDateTime
-      creationDate; // Поле не может быть null, Значение этого поля должно генерироваться
-  // автоматически
-  private Float enginePower; // Поле не может быть null, Значение поля должно быть больше 0
-  private Float distanceTravelled; // Поле не может быть null, Значение поля должно быть больше 0
-  private VehicleType type; // Поле может быть null
-  private FuelType fuelType; // Поле не может быть null
 
+  /** Name of the vehicle. Cannot be null or empty. */
+  @NotNull @NotEmpty private String name; // Поле не может быть null, Строка не может быть пустой
+
+  /** Coordinates of the vehicle's location. Cannot be null. */
+  @JsonUnwrapped @NotNull private Coordinates coordinates;
+
+  /** Date and time when the vehicle was created. Cannot be null. */
+  @NotNull @Setter private java.time.ZonedDateTime creationDate;
+
+  /** Power of the vehicle's engine. Must be positive. Not null. */
+  @NotNull @Positive private Float enginePower;
+
+  /** Total distance travelled by the vehicle. Must be positive. Not null. */
+  @NotNull @Positive private Float distanceTravelled;
+
+  /** Type of the vehicle. Can be null. */
+  private VehicleType type;
+
+  /** Type of fuel used by the vehicle. Cannot be null. */
+  @NotNull private FuelType fuelType;
+
+  /**
+   * Constructs a new Vehicle with the specified attributes.
+   *
+   * @param id the unique identifier of the vehicle
+   * @param name the name of the vehicle
+   * @param coordinates the coordinates of the vehicle's location
+   * @param creationDate the date and time when the vehicle was created
+   * @param enginePower the power of the vehicle's engine
+   * @param distanceTravelled the total distance travelled by the vehicle
+   * @param type the type of the vehicle
+   * @param fuelType the type of fuel used by the vehicle
+   */
   public Vehicle(
       int id,
       String name,
@@ -45,35 +75,16 @@ public class Vehicle implements Comparable<Vehicle> {
   }
 
   /**
-   * Compares this object with the specified object for order. Returns a negative integer, zero, or
-   * a positive integer as this object is less than, equal to, or greater than the specified object.
+   * Compares this vehicle with another vehicle based on engine power. Returns a negative integer,
+   * zero, or a positive integer as this vehicle's engine power is less than, equal to, or greater
+   * than the other vehicle's.
    *
-   * <p>The implementor must ensure {@link Integer#signum signum}{@code (x.compareTo(y)) ==
-   * -signum(y.compareTo(x))} for all {@code x} and {@code y}. (This implies that {@code
-   * x.compareTo(y)} must throw an exception if and only if {@code y.compareTo(x)} throws an
-   * exception.)
-   *
-   * <p>The implementor must also ensure that the relation is transitive: {@code (x.compareTo(y) > 0
-   * && y.compareTo(z) > 0)} implies {@code x.compareTo(z) > 0}.
-   *
-   * <p>Finally, the implementor must ensure that {@code x.compareTo(y)==0} implies that {@code
-   * signum(x.compareTo(z)) == signum(y.compareTo(z))}, for all {@code z}.
-   *
-   * @param v the object to be compared.
-   * @return a negative integer, zero, or a positive integer as this object is less than, equal to,
-   *     or greater than the specified object.
-   * @throws NullPointerException if the specified object is null
-   * @throws ClassCastException if the specified object's type prevents it from being compared to
-   *     this object.
-   * @apiNote It is strongly recommended, but <i>not</i> strictly required that {@code
-   *     (x.compareTo(y)==0) == (x.equals(y))}. Generally speaking, any class that implements the
-   *     {@code Comparable} interface and violates this condition should clearly indicate this fact.
-   *     The recommended language is "Note: this class has a natural ordering that is inconsistent
-   *     with equals."
+   * @param v the vehicle to be compared
+   * @return a negative integer, zero, or a positive integer as this vehicle's engine power is less
+   *     than, equal to, or greater than the other vehicle's
+   * @throws NullPointerException if the specified vehicle is null
    */
   public int compareTo(Vehicle v) {
-    return (int)
-        ((v.getEnginePower() - v.getDistanceTravelled())
-            - (this.enginePower - this.distanceTravelled));
+    return (int) ((this.enginePower - v.getEnginePower()) * 1000);
   }
 }
