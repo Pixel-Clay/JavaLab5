@@ -1,5 +1,7 @@
 package SerializeTest;
 
+import clay.vehicle.commands.Show;
+import clay.vehicle.dataStorage.CsvReader;
 import clay.vehicle.dataStorage.CsvWriter;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.*;
@@ -11,6 +13,7 @@ import java.time.*;
 public class Main {
   public static void main(String[] args) {
     VehicleStorage storage = new VehicleStorage();
+    storage.getNextId();
 
     Vehicle car1 =
         new Vehicle(
@@ -45,5 +48,17 @@ public class Main {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    VehicleStorage new_storage = null;
+    // Test loading
+    try {
+      new_storage = CsvReader.readVehicleStorageFromCsv(outputPath);
+      System.out.println("Successfully loaded " + new_storage.getStorage().size() + " vehicles");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    Show show = new Show(new_storage);
+    System.out.println(show.execute());
   }
 }
