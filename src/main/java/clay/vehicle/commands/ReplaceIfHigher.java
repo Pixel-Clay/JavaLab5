@@ -1,0 +1,69 @@
+package clay.vehicle.commands;
+
+import clay.vehicle.Shell;
+import clay.vehicle.dataStorage.VehicleStorage;
+import clay.vehicle.vehicles.Vehicle;
+import jakarta.validation.ValidationException;
+
+/**
+ * Command implementation for replacing a vehicle if the new one is greater. This command replaces
+ * an existing vehicle with a new one only if the new vehicle is greater than the existing one.
+ */
+public class ReplaceIfHigher implements Executable {
+  /** The storage instance where vehicles are stored */
+  VehicleStorage storage;
+
+  /** The shell instance for input/output operations */
+  Shell shell;
+
+  /**
+   * Constructs a new ReplaceIfHigher command with the specified storage.
+   *
+   * @param storage the storage where vehicles will be replaced
+   */
+  public ReplaceIfHigher(VehicleStorage storage) {
+    this.storage = storage;
+  }
+
+  /**
+   * Executes the replace_if_greater command. Takes a vehicle ID as argument and prompts for a new
+   * vehicle. If the new vehicle is greater than the existing one, replaces it.
+   *
+   * @param args command arguments, where args[0] is the ID of the vehicle to potentially replace
+   * @return a message indicating whether a replacement occurred
+   */
+  @Override
+  public String execute(String[] args) {
+    Integer id;
+    try {
+      id = Integer.parseInt(args[0]);
+    } catch (NumberFormatException e) {
+      return "! Invalid id";
+    } catch (ArrayIndexOutOfBoundsException e) {
+      return "! Not enough arguments";
+    }
+    Vehicle replace;
+    try {
+      replace = MiscUtils.getaVehicleFromInput(shell, storage);
+    } catch (ValidationException e) {
+      return "! Format error";
+    }
+    Vehicle old = storage.getElement(id);
+    if (old.compareTo(replace) < 0) {
+      storage.updateElement(old.getId(), replace);
+      return "Replaced 1 item";
+    } else {
+      return "Replaced 0 items";
+    }
+  }
+
+  /**
+   * Attaches a shell instance to this command.
+   *
+   * @param newShell the shell instance to attach
+   */
+  @Override
+  public void attachShell(Shell newShell) {
+    this.shell = newShell;
+  }
+}
