@@ -9,7 +9,22 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Utility class for writing vehicle data to CSV files. This class provides functionality to
+ * serialize VehicleStorage objects to CSV format using Jackson's CSV mapping capabilities.
+ */
 public class CsvWriter {
+  /**
+   * Writes a VehicleStorage object to a CSV file. The method performs the following steps: 1.
+   * Configures the CSV mapper with appropriate modules and settings 2. Creates any necessary parent
+   * directories for the output file 3. Serializes the storage data to CSV format 4. Writes the data
+   * to the specified file
+   *
+   * @param storage the VehicleStorage object to write
+   * @param outputPath the path where the CSV file should be written
+   * @return a message indicating where the CSV file was written
+   * @throws IOException if there are issues creating directories or writing the file
+   */
   public static String writeVehicleStorageToCsv(VehicleStorage storage, Path outputPath)
       throws IOException {
     CsvMapper csvMapper = new CsvMapper();
@@ -17,21 +32,7 @@ public class CsvWriter {
     csvMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     // Define CSV schema based on VehicleStorageCsvRow
-    CsvSchema schema =
-        CsvSchema.builder()
-            .addColumn("license_plate")
-            .addColumn("id")
-            .addColumn("name")
-            .addColumn("x")
-            .addColumn("y")
-            .addColumn("creationDate")
-            .addColumn("enginePower")
-            .addColumn("distanceTravelled")
-            .addColumn("type")
-            .addColumn("fuelType")
-            .addColumn("init_date")
-            .build()
-            .withHeader();
+    CsvSchema schema = MapperSchema.schema;
 
     // Create parent directories if they don't exist
     Files.createDirectories(outputPath.getParent());
