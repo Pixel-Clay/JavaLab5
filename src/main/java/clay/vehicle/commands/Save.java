@@ -1,6 +1,5 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.CsvWriter;
 import clay.vehicle.dataStorage.VehicleStorage;
 import java.io.IOException;
@@ -10,7 +9,7 @@ import java.nio.file.Path;
  * Command implementation for saving the vehicle storage to a CSV file. This command writes all
  * vehicles in the storage to a CSV file at the specified path.
  */
-public class Save implements Executable {
+public class Save extends ExecutableRequiresShell {
   /** The storage instance containing the vehicles to save */
   VehicleStorage storage;
 
@@ -46,13 +45,4 @@ public class Save implements Executable {
 
     return "Saved collection to " + savePath;
   }
-
-  /**
-   * Attaches a shell instance to this command. This command doesn't require shell access, so this
-   * method is empty.
-   *
-   * @param newShell the shell instance to attach (not used)
-   */
-  @Override
-  public void attachShell(Shell newShell) {}
 }

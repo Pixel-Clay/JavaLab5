@@ -3,10 +3,10 @@ package clay.vehicle.dataStorage;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
- * Defines the schema for CSV mapping of vehicle data. This record contains the structure of the CSV
+ * Defines the schema for CSV mapping of vehicle data. This class contains the structure of the CSV
  * file used for storing vehicle information, including all required fields and their order.
  */
-public record MapperSchema() {
+public class MapperSchema {
   /**
    * The CSV schema definition for vehicle data. Defines the columns and their order in the CSV
    * file: - id: Unique identifier for the vehicle - name: Name of the vehicle - x, y: Coordinates
@@ -15,6 +15,8 @@ public record MapperSchema() {
    * the vehicle - fuelType: Type of fuel used by the vehicle - init_date: Initialization date of
    * the vehicle record
    */
+  private MapperSchema() {}
+
   public static final CsvSchema schema =
       CsvSchema.builder()
           .addColumn("id")

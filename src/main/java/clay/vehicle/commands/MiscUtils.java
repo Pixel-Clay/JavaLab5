@@ -8,8 +8,6 @@ import clay.vehicle.vehicles.Vehicle;
 import clay.vehicle.vehicles.VehicleType;
 import jakarta.validation.*;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,67 +15,6 @@ import java.util.Set;
  * methods for parsing input, converting strings to enums, and creating vehicles from user input.
  */
 public class MiscUtils {
-
-  /**
-   * Parses an array of key-value pairs into a map. Each string in the array should be in the format
-   * "key=value".
-   *
-   * @param s array of strings in key=value format
-   * @return a map containing the parsed key-value pairs
-   */
-  public static Map<String, String> parseKeyValue(String[] s) {
-    String[] pair;
-    Map<String, String> keyValueMap = new HashMap<>();
-
-    for (String argument : s) {
-      pair = argument.split("=");
-      keyValueMap.put(pair[0], pair[1]);
-    }
-
-    return keyValueMap;
-  }
-
-  /**
-   * Converts a string to a FuelType enum value.
-   *
-   * @param s the string to convert
-   * @return the corresponding FuelType, or null if the string doesn't match any enum value
-   */
-  public static FuelType stringToFuelType(String s) {
-    switch (s) {
-      case "alcohol":
-        return FuelType.ALCOHOL;
-
-      case "manpower":
-        return FuelType.MANPOWER;
-
-      case "nuclear":
-        return FuelType.NUCLEAR;
-    }
-    return null;
-  }
-
-  /**
-   * Converts a string to a VehicleType enum value.
-   *
-   * @param s the string to convert
-   * @return the corresponding VehicleType, or null if the string doesn't match any enum value
-   */
-  public static VehicleType stringToVehicleType(String s) {
-    switch (s) {
-      case "car":
-        return VehicleType.CAR;
-      case "plane":
-        return VehicleType.PLANE;
-      case "helicopter":
-        return VehicleType.HELICOPTER;
-      case "hoverboard":
-        return VehicleType.HOVERBOARD;
-      case "spaceship":
-        return VehicleType.SPACESHIP;
-    }
-    return null;
-  }
 
   /**
    * Prompts the user for a non-null Double value. Keeps prompting until a valid number is entered.
@@ -139,7 +76,7 @@ public class MiscUtils {
       String inp = shell.getInput("Insert " + invitation);
       if (inp == null) return null;
       else {
-        x = stringToVehicleType(inp);
+        x = VehicleType.valueOf(inp.toUpperCase());
         if (x == null) System.out.println("! " + invitation + "input not in enum");
         else break;
       }
@@ -161,7 +98,7 @@ public class MiscUtils {
       String inp = shell.getInput("Insert " + invitation);
       if (inp == null) System.out.println("! " + invitation + "can't be null");
       else {
-        x = stringToFuelType(inp);
+        x = FuelType.valueOf(inp.toUpperCase());
         if (x == null) System.out.println("! " + invitation + "input not in enum");
         else break;
       }

@@ -1,13 +1,12 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 
 /**
  * Command implementation for clearing the vehicle storage. This command removes all vehicles from
  * the storage.
  */
-public class Clear implements Executable {
+public class Clear extends ExecutableRequiresShell {
 
   /** The storage instance to be cleared */
   VehicleStorage storage;
@@ -29,16 +28,7 @@ public class Clear implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    storage.clearClooection();
+    storage.clearCollection();
     return "Cleared collection";
   }
-
-  /**
-   * Attaches a shell instance to this command. This command doesn't require shell access, so this
-   * method is empty.
-   *
-   * @param newShell the shell instance to attach (not used)
-   */
-  @Override
-  public void attachShell(Shell newShell) {}
 }

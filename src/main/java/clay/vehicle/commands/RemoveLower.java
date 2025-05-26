@@ -1,6 +1,5 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
@@ -12,12 +11,9 @@ import java.util.stream.Collectors;
  * prompts for an example vehicle and removes all vehicles from the storage that are less than the
  * example according to their natural ordering.
  */
-public class RemoveLower implements Executable {
+public class RemoveLower extends ExecutableRequiresShell {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
-
-  /** The shell instance for input/output operations */
-  Shell shell;
 
   /**
    * Constructs a new RemoveLower command with the specified storage.
@@ -41,7 +37,7 @@ public class RemoveLower implements Executable {
     try {
       example = MiscUtils.getaVehicleFromInput(shell, storage);
     } catch (ValidationException e) {
-      return "! Format error";
+      return "! Format error: " + e.getMessage();
     }
     Integer counter = 0;
 
@@ -57,15 +53,5 @@ public class RemoveLower implements Executable {
     }
 
     return "Removed " + counter + " items";
-  }
-
-  /**
-   * Attaches a shell instance to this command.
-   *
-   * @param newShell the shell instance to attach
-   */
-  @Override
-  public void attachShell(Shell newShell) {
-    this.shell = newShell;
   }
 }

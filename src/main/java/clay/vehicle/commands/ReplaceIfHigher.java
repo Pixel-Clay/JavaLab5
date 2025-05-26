@@ -1,6 +1,5 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
@@ -9,12 +8,9 @@ import jakarta.validation.ValidationException;
  * Command implementation for replacing a vehicle if the new one is greater. This command replaces
  * an existing vehicle with a new one only if the new vehicle is greater than the existing one.
  */
-public class ReplaceIfHigher implements Executable {
+public class ReplaceIfHigher extends ExecutableRequiresShell {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
-
-  /** The shell instance for input/output operations */
-  Shell shell;
 
   /**
    * Constructs a new ReplaceIfHigher command with the specified storage.
@@ -46,7 +42,7 @@ public class ReplaceIfHigher implements Executable {
     try {
       replace = MiscUtils.getaVehicleFromInput(shell, storage);
     } catch (ValidationException e) {
-      return "! Format error";
+      return "! Format error: " + e.getMessage();
     }
     Vehicle old = storage.getElement(id);
     if (old.compareTo(replace) < 0) {
@@ -55,15 +51,5 @@ public class ReplaceIfHigher implements Executable {
     } else {
       return "Replaced 0 items";
     }
-  }
-
-  /**
-   * Attaches a shell instance to this command.
-   *
-   * @param newShell the shell instance to attach
-   */
-  @Override
-  public void attachShell(Shell newShell) {
-    this.shell = newShell;
   }
 }

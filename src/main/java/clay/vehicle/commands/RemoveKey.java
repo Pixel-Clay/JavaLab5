@@ -1,6 +1,5 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 
@@ -8,12 +7,9 @@ import clay.vehicle.vehicles.Vehicle;
  * Command implementation for removing a vehicle by its key. This command removes a vehicle from the
  * storage using its key (ID).
  */
-public class RemoveKey implements Executable {
+public class RemoveKey extends ExecutableRequiresShell {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
-
-  /** The shell instance for input/output operations */
-  Shell shell;
 
   /**
    * Constructs a new RemoveKey command with the specified storage.
@@ -39,15 +35,5 @@ public class RemoveKey implements Executable {
     Vehicle res = storage.removeKey(key);
     if (res == null) return "! Specified key not found";
     else return "Removed key " + key;
-  }
-
-  /**
-   * Attaches a shell instance to this command.
-   *
-   * @param newShell the shell instance to attach
-   */
-  @Override
-  public void attachShell(Shell newShell) {
-    this.shell = newShell;
   }
 }

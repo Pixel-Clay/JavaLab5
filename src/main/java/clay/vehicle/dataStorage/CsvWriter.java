@@ -36,8 +36,6 @@ public class CsvWriter {
 
     // Create parent directories if they don't exist
     Files.createDirectories(outputPath.getParent());
-
-    // Convert Path to File for compatibility with Jackson's CsvWriter
     File outputFile = outputPath.toFile();
 
     // Write to CSV using the CsvWriter

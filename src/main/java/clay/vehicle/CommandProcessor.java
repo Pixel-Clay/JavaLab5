@@ -11,9 +11,9 @@ import lombok.Setter;
  */
 public class CommandProcessor {
 
-  ArrayList<String> instructions = new ArrayList<>();
+  private List<String> instructions = new ArrayList<>();
 
-  @Getter @Setter HashMap<String, Executable> commands = new HashMap<>();
+  @Getter @Setter private Map<String, Executable> commands = new HashMap<>();
 
   /**
    * Adds a new instruction to the processing queue.
@@ -54,7 +54,7 @@ public class CommandProcessor {
     String instruction;
     for (Integer idx = 0; idx < instructions.toArray().length; idx++) {
       instruction = instructions.get(idx);
-      String[] splitInstruction = instruction.split(" ");
+      String[] splitInstruction = instruction.split("\\s+");
       Executable curCommand = commands.get(splitInstruction[0]);
       if (curCommand == null) {
         instructions.clear();

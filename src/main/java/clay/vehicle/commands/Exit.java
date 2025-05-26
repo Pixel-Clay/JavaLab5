@@ -1,12 +1,10 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
-
 /**
  * Command implementation for exiting the application. This command terminates the program when
  * executed.
  */
-public class Exit implements Executable {
+public class Exit extends ExecutableRequiresShell {
 
   /**
    * Executes the exit command. Terminates the program with exit code 0.
@@ -16,16 +14,7 @@ public class Exit implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    System.exit(0);
-    return "";
+    shell.setExitFlag();
+    return "Exiting...";
   }
-
-  /**
-   * Attaches a shell instance to this command. This command doesn't require shell access, so this
-   * method is empty.
-   *
-   * @param newShell the shell instance to attach (not used)
-   */
-  @Override
-  public void attachShell(Shell newShell) {}
 }
