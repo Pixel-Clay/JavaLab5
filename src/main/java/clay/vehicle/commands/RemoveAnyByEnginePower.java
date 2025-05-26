@@ -1,22 +1,17 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Command implementation for removing a vehicle with a specific engine power. This command removes
  * one vehicle from the storage that has the specified engine power. If multiple vehicles have the
  * same engine power, only one is removed.
  */
-public class RemoveAnyByEnginePower implements Executable {
+public class RemoveAnyByEnginePower extends ExecutableRequiresShell {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
-
-  /** The shell instance for input/output operations */
-  Shell shell;
 
   /**
    * Constructs a new RemoveAnyByEnginePower command with the specified storage.
@@ -36,35 +31,25 @@ public class RemoveAnyByEnginePower implements Executable {
    */
   @Override
   public String execute(String[] args) {
+    if (args.length == 0) return "! Not enough arguments";
+
     Float enginePower;
     try {
       enginePower = Float.parseFloat(args[0]);
     } catch (NumberFormatException e) {
       return "! Invalid argument";
-    } catch (ArrayIndexOutOfBoundsException e) {
-      return "! Not enough arguments";
     }
 
-    Set<Integer> lowerIds =
+    Optional<Integer> lowerIds =
         this.storage.getCollection().values().stream()
             .filter(vehicle -> vehicle.getEnginePower().equals(enginePower))
             .map(Vehicle::getId)
-            .collect(Collectors.toSet());
+            .findAny();
 
-    if (lowerIds.toArray().length == 0) return "Removed 0 items";
+    if (lowerIds.isEmpty()) return "Removed 0 items";
     else {
-      storage.removeKey(lowerIds.iterator().next());
+      storage.removeKey(Integer.valueOf(String.valueOf(lowerIds)));
       return "Removed 1 item";
     }
-  }
-
-  /**
-   * Attaches a shell instance to this command.
-   *
-   * @param newShell the shell instance to attach
-   */
-  @Override
-  public void attachShell(Shell newShell) {
-    this.shell = newShell;
   }
 }

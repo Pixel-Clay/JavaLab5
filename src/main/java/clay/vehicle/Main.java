@@ -18,6 +18,7 @@ import java.nio.file.Path;
  * CSV file containing vehicle data.
  */
 public class Main {
+
   /**
    * The main method that initializes and runs the Vehicle Management System.
    *
@@ -28,46 +29,47 @@ public class Main {
    * @param args Command line arguments (not used)
    */
   public static void main(String[] args) {
-    VehicleStorage new_storage = null;
+    VehicleStorage newStorage = null;
     Path outputPath = null;
 
     try {
       outputPath = EnvPathRetriever.getPath("CLAY_VEHICLE_DATA_PATH");
     } catch (NoEnvVarFoundException e) {
       System.out.println("Env var not found, set one at $CLAY_VEHICLE_DATA_PATH");
-      System.exit(0);
+      System.exit(-1);
     }
     try {
-      new_storage = CsvReader.readVehicleStorageFromCsv(outputPath);
+      newStorage = CsvReader.readVehicleStorageFromCsv(outputPath);
     } catch (FileNotFoundException e) {
       System.out.println("Database not found. Exiting...");
-      System.exit(0);
+      System.exit(-2);
     } catch (IOException e) {
-      System.out.println("Critical IO exception. Exiting...");
-      System.exit(0);
+      e.printStackTrace();
+      System.out.println("Critical IO exception: " + e.getMessage() + ". Exiting...");
+      System.exit(-3);
     }
     System.out.println(
-        "Successfully loaded " + new_storage.getStorage().size() + " vehicles after validation");
+        "Successfully loaded " + newStorage.getStorage().size() + " vehicles after validation");
 
     Shell shell = new Shell();
 
     shell.attachCommand(new Exit(), "exit");
-    shell.attachCommand(new Info(new_storage), "info");
-    shell.attachCommand(new Show(new_storage), "show");
+    shell.attachCommand(new Info(newStorage), "info");
+    shell.attachCommand(new Show(newStorage), "show");
     shell.attachCommand(new Help(), "help");
-    shell.attachCommand(new RemoveKey(new_storage), "remove_key");
-    shell.attachCommand(new Insert(new_storage), "insert");
-    shell.attachCommand(new Update(new_storage), "update");
-    shell.attachCommand(new Clear(new_storage), "clear");
-    shell.attachCommand(new Save(new_storage, outputPath), "save");
+    shell.attachCommand(new RemoveKey(newStorage), "remove_key");
+    shell.attachCommand(new Insert(newStorage), "insert");
+    shell.attachCommand(new Update(newStorage), "update");
+    shell.attachCommand(new Clear(newStorage), "clear");
+    shell.attachCommand(new Save(newStorage, outputPath), "save");
     shell.attachCommand(new ExecuteScript(shell.getProcessor()), "execute_script");
-    shell.attachCommand(new RemoveLower(new_storage), "remove_lower");
-    shell.attachCommand(new ReplaceIfHigher(new_storage), "replace_if_greater");
-    shell.attachCommand(new RemoveLowerKey(new_storage), "remove_lower_key");
-    shell.attachCommand(new RemoveAnyByEnginePower(new_storage), "remove_any_by_engine_power");
-    shell.attachCommand(new PrintAscending(new_storage), "print_ascending");
+    shell.attachCommand(new RemoveLower(newStorage), "remove_lower");
+    shell.attachCommand(new ReplaceIfHigher(newStorage), "replace_if_greater");
+    shell.attachCommand(new RemoveLowerKey(newStorage), "remove_lower_key");
+    shell.attachCommand(new RemoveAnyByEnginePower(newStorage), "remove_any_by_engine_power");
+    shell.attachCommand(new PrintAscending(newStorage), "print_ascending");
     shell.attachCommand(
-        new GroupCountungByCoordinates(new_storage), "group_counting_by_coordinates");
+        new GroupCountungByCoordinates(newStorage), "group_counting_by_coordinates");
 
     shell.run();
   }

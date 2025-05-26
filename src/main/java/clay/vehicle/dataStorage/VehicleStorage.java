@@ -16,10 +16,10 @@ import lombok.Setter;
 public class VehicleStorage implements Comparable<VehicleStorage> {
 
   /** The initialization date of this storage */
-  @Getter @Setter ZonedDateTime initDate;
+  @Getter @Setter private ZonedDateTime initDate;
 
   /** The storage map containing vehicles indexed by their IDs */
-  @Getter @Setter private HashMap<Integer, Vehicle> storage = new HashMap<>();
+  @Getter @Setter private Map<Integer, Vehicle> storage = new HashMap<>();
 
   /** Constructs a new VehicleStorage with the current date and time as initialization date. */
   public VehicleStorage() {
@@ -40,12 +40,8 @@ public class VehicleStorage implements Comparable<VehicleStorage> {
    *
    * @return a list containing all vehicles in the storage
    */
-  public ArrayList<Vehicle> getValues() {
-    ArrayList<Vehicle> values = new ArrayList<>();
-    for (Integer key : this.storage.keySet()) {
-      values.add(this.storage.get(key));
-    }
-    return values;
+  public Collection<Vehicle> getValues() {
+    return this.storage.values();
   }
 
   /**
@@ -110,7 +106,7 @@ public class VehicleStorage implements Comparable<VehicleStorage> {
    *
    * @return the HashMap containing all vehicles
    */
-  public HashMap<Integer, Vehicle> getCollection() {
+  public Map<Integer, Vehicle> getCollection() {
     return storage;
   }
 
@@ -120,8 +116,8 @@ public class VehicleStorage implements Comparable<VehicleStorage> {
    *
    * @return the next available ID
    */
-  public Integer getNextId() {
-    Integer nextId = null;
+  public int getNextId() {
+    int nextId;
     try {
       nextId = Collections.max(this.storage.keySet().stream().toList()) + 1;
     } catch (NoSuchElementException e) {
@@ -134,7 +130,7 @@ public class VehicleStorage implements Comparable<VehicleStorage> {
    * Clears all vehicles from the storage. This method creates a new empty HashMap to replace the
    * current storage.
    */
-  public void clearClooection() {
+  public void clearCollection() {
     this.storage = new HashMap<>();
   }
 

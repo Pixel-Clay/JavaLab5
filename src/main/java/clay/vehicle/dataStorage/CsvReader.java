@@ -2,8 +2,10 @@ package clay.vehicle.dataStorage;
 
 import clay.vehicle.vehicles.Coordinates;
 import clay.vehicle.vehicles.Vehicle;
+import clay.vehicle.vehicles.VehicleType;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.cfg.*;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -37,6 +39,9 @@ public class CsvReader {
     CsvMapper csvMapper = new CsvMapper();
     csvMapper.registerModule(new JavaTimeModule()); // Handles ZonedDateTime
     csvMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    csvMapper
+        .coercionConfigFor(VehicleType.class)
+        .setCoercion(CoercionInputShape.EmptyString, CoercionAction.AsNull);
 
     // Define CSV schema based on the header
     CsvSchema schema = MapperSchema.schema;

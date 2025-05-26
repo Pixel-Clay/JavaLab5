@@ -1,6 +1,5 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
@@ -10,10 +9,7 @@ import jakarta.validation.ValidationException;
  * specified ID by replacing it with a new vehicle that has the same ID but potentially different
  * attributes.
  */
-public class Update implements Executable {
-  /** The shell instance for input/output operations */
-  Shell shell;
-
+public class Update extends ExecutableRequiresShell {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 
@@ -48,22 +44,12 @@ public class Update implements Executable {
     try {
       update = MiscUtils.getaVehicleFromInput(shell, storage);
     } catch (ValidationException e) {
-      return "! Format error";
+      return "! Format error: " + e.getMessage();
     }
     update.setId(id);
 
     storage.insert(update);
 
     return "Updated id " + id + ": " + update;
-  }
-
-  /**
-   * Attaches a shell instance to this command.
-   *
-   * @param newShell the shell instance to attach
-   */
-  @Override
-  public void attachShell(Shell newShell) {
-    this.shell = newShell;
   }
 }

@@ -1,13 +1,12 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 
 /**
  * Command implementation for displaying information about the vehicle storage. This command shows
  * the initialization date, type, and number of vehicles in the storage.
  */
-public class Info implements Executable {
+public class Info extends ExecutableRequiresShell {
   /** The storage instance to get information about */
   VehicleStorage storage;
 
@@ -35,13 +34,4 @@ public class Info implements Executable {
                         Len: %d""",
         storage.getInitDate(), storage.getType(), storage.getLen());
   }
-
-  /**
-   * Attaches a shell instance to this command. This command doesn't require shell access, so this
-   * method is empty.
-   *
-   * @param newShell the shell instance to attach (not used)
-   */
-  @Override
-  public void attachShell(Shell newShell) {}
 }

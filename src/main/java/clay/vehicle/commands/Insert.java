@@ -1,6 +1,5 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
@@ -9,11 +8,7 @@ import jakarta.validation.ValidationException;
  * Command implementation for inserting a new vehicle into the storage. This command prompts the
  * user for vehicle details and adds the new vehicle to the storage if all validations pass.
  */
-public class Insert implements Executable {
-
-  /** The shell instance for input/output operations */
-  Shell shell;
-
+public class Insert extends ExecutableRequiresShell {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 
@@ -39,20 +34,10 @@ public class Insert implements Executable {
     try {
       v = MiscUtils.getaVehicleFromInput(shell, storage);
     } catch (ValidationException e) {
-      return "! Format error";
+      return "! Format error: " + e.getMessage();
     }
 
     storage.insert(v);
     return "Inserted new " + v;
-  }
-
-  /**
-   * Attaches a shell instance to this command.
-   *
-   * @param newShell the shell instance to attach
-   */
-  @Override
-  public void attachShell(Shell newShell) {
-    this.shell = newShell;
   }
 }

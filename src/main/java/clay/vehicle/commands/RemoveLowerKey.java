@@ -1,6 +1,5 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.Shell;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import java.util.Set;
@@ -10,12 +9,9 @@ import java.util.stream.Collectors;
  * Command implementation for removing vehicles with IDs less than a specified value. This command
  * removes all vehicles from the storage that have an ID less than the provided ID value.
  */
-public class RemoveLowerKey implements Executable {
+public class RemoveLowerKey extends ExecutableRequiresShell {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
-
-  /** The shell instance for input/output operations */
-  Shell shell;
 
   /**
    * Constructs a new RemoveLowerKey command with the specified storage.
@@ -58,15 +54,5 @@ public class RemoveLowerKey implements Executable {
     }
 
     return "Removed " + counter + " items";
-  }
-
-  /**
-   * Attaches a shell instance to this command.
-   *
-   * @param newShell the shell instance to attach
-   */
-  @Override
-  public void attachShell(Shell newShell) {
-    this.shell = newShell;
   }
 }

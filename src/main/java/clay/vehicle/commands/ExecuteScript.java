@@ -2,12 +2,12 @@ package clay.vehicle.commands;
 
 import clay.vehicle.CommandProcessor;
 import clay.vehicle.InvalidInstructionException;
-import clay.vehicle.Shell;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  * reads a script file line by line and executes each command in sequence. The script file should
  * contain one command per line.
  */
-public class ExecuteScript implements Executable {
+public class ExecuteScript extends ExecutableRequiresShell {
   /** The command processor used to execute script commands */
   CommandProcessor processor;
 
@@ -41,6 +41,8 @@ public class ExecuteScript implements Executable {
   @Override
   public String execute(String[] args) {
     processor.clearQueue();
+    shell.setRecordedInputFlag();
+
     Path path;
     String script;
     try {
@@ -50,35 +52,41 @@ public class ExecuteScript implements Executable {
     }
 
     try (FileInputStream fis = new FileInputStream(path.toFile());
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-      byte[] buffer = new byte[1024];
-      int bytesRead;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
+      StringBuilder builder = new StringBuilder();
+      String line;
 
-      // Read bytes and write to ByteArrayOutputStream
-      while ((bytesRead = bis.read(buffer)) != -1) {
-        bos.write(buffer, 0, bytesRead);
+      while ((line = reader.readLine()) != null) {
+        builder.append(line).append("\n");
       }
 
       // Convert all bytes to a single String
-      script = bos.toString();
+      script = builder.toString();
 
-      Pattern pattern = Pattern.compile(path.getFileName().toString() + "\\z");
+      Pattern pattern = Pattern.compile(path.toFile().getAbsolutePath().replace("\\", "/") + "\\z");
 
-      for (String line : script.split("\n")) {
-        line = line.strip();
-        if (line.isEmpty()) continue;
+      for (String l : script.split("\n")) {
+        if (l.startsWith(";")) continue; // comments
+        if (l.startsWith(":")) { // user input
+          if (l.length() <= 2) shell.addToInputBuffer(null);
+          else shell.addToInputBuffer(l.substring(2));
+          continue;
+        }
 
-        if (line.contains("execute_script")) {
-          Matcher matcher = pattern.matcher(line);
+        l = l.strip();
+
+        if (l.isEmpty()) continue;
+
+        if (Objects.equals(l.split(" ")[0], "execute_script")) {
+          Matcher matcher = pattern.matcher(l.replace("\\", "/"));
           if (matcher.find()) return "! Recursion not allowed";
         }
 
-        processor.addInstruction(line);
+        processor.addInstruction(l);
       }
 
     } catch (IOException e) {
-      e.printStackTrace();
+      return "! IOException: " + e.getMessage();
     }
 
     try {
@@ -87,15 +95,6 @@ public class ExecuteScript implements Executable {
       return "Invalid command at line " + e.getMessage();
     }
 
-    return "Script executed successfully";
+    return "\nScript executed successfully";
   }
-
-  /**
-   * Attaches a shell instance to this command. This command doesn't require shell access, so this
-   * method is empty.
-   *
-   * @param newShell the shell instance to attach (not used)
-   */
-  @Override
-  public void attachShell(Shell newShell) {}
 }
