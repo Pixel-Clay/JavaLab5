@@ -29,7 +29,10 @@ public class MiscUtils {
       String inp = shell.getInput("Insert " + invitation);
       try {
         x = Double.valueOf(inp);
-        break;
+        if (x.isInfinite()) {
+          System.out.println("! Value can't be infinite");
+          continue;
+        } else break;
       } catch (NumberFormatException e) {
         System.out.println("! Not a number");
       } catch (NullPointerException e) {
@@ -52,6 +55,10 @@ public class MiscUtils {
       String inp = shell.getInput("Insert " + invitation);
       try {
         x = Float.valueOf(inp);
+        if (x.isInfinite()) {
+          System.out.println("! Value can't be infinite");
+          continue;
+        }
         break;
       } catch (NumberFormatException e) {
         System.out.println("! Not a number");
@@ -76,9 +83,13 @@ public class MiscUtils {
       String inp = shell.getInput("Insert " + invitation);
       if (inp == null) return null;
       else {
-        x = VehicleType.valueOf(inp.toUpperCase());
-        if (x == null) System.out.println("! " + invitation + "input not in enum");
-        else break;
+        try {
+          x = VehicleType.valueOf(inp.toUpperCase());
+        } catch (IllegalArgumentException e) {
+          System.out.println("! Input not in enum");
+          continue;
+        }
+        break;
       }
     }
     return x;
@@ -98,9 +109,13 @@ public class MiscUtils {
       String inp = shell.getInput("Insert " + invitation);
       if (inp == null) System.out.println("! " + invitation + "can't be null");
       else {
-        x = FuelType.valueOf(inp.toUpperCase());
-        if (x == null) System.out.println("! " + invitation + "input not in enum");
-        else break;
+        try {
+          x = FuelType.valueOf(inp.toUpperCase());
+        } catch (IllegalArgumentException e) {
+          System.out.println("! Input not in enum");
+          continue;
+        }
+        break;
       }
     }
     return x;

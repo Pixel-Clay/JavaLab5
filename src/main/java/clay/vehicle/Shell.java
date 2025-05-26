@@ -1,6 +1,7 @@
 package clay.vehicle;
 
 import clay.vehicle.commands.Executable;
+import clay.vehicle.commands.RecursionException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
@@ -101,6 +102,8 @@ public class Shell {
         processor.run();
       } catch (InvalidInstructionException e) {
         System.out.println("! Unknown command");
+      } catch (RecursionException e) {
+        System.out.println("! Recursion not allowed. Call stack: " + e.getMessage());
       }
     }
   }
