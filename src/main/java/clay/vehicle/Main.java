@@ -33,7 +33,7 @@ public class Main {
     Path outputPath = null;
 
     try {
-      outputPath = EnvPathRetriever.getPath("CLAY_VEHICLE_DATA_PATH");
+      outputPath = EnvPathRetriever.getPath("CLAY_VEHICLE_DATA_PATH").toAbsolutePath();
     } catch (NoEnvVarFoundException e) {
       System.out.println("Env var not found, set one at $CLAY_VEHICLE_DATA_PATH");
       System.exit(-1);

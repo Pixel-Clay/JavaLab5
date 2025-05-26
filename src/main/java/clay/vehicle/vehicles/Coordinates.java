@@ -3,6 +3,7 @@ package clay.vehicle.vehicles;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,5 +49,10 @@ public class Coordinates {
     if (o == null || getClass() != o.getClass()) return false;
     Coordinates that = (Coordinates) o;
     return Double.compare(getX(), that.getX()) == 0 && Double.compare(getY(), that.getY()) == 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getX(), getY());
   }
 }
