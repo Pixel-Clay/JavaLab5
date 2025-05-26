@@ -32,6 +32,9 @@ public class MiscUtils {
         if (x.isInfinite()) {
           System.out.println("! Value can't be infinite");
           continue;
+        } else if (x.isNaN()) {
+          System.out.println("! Value can't be NaN");
+          continue;
         } else break;
       } catch (NumberFormatException e) {
         System.out.println("! Not a number");
@@ -57,6 +60,9 @@ public class MiscUtils {
         x = Float.valueOf(inp);
         if (x.isInfinite()) {
           System.out.println("! Value can't be infinite");
+          continue;
+        } else if (x.isNaN()) {
+          System.out.println("! Value can't be NaN");
           continue;
         }
         break;
