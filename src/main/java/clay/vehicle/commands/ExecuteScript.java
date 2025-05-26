@@ -54,7 +54,9 @@ public class ExecuteScript extends ExecutableRequiresShell {
 
     path = Path.of(args[0]);
 
-    if (callStack.contains(path)) throw new RecursionException(callStack.toString());
+    if (callStack.contains(path)) {
+      throw new RecursionException(callStack.toString());
+    }
 
     try (FileInputStream fis = new FileInputStream(path.toFile());
         BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
@@ -101,6 +103,7 @@ public class ExecuteScript extends ExecutableRequiresShell {
       callStack.remove(path);
       return "Invalid command at line " + e.getMessage();
     } catch (RecursionException e) {
+      callStack.clear();
       throw new RecursionException(e.getMessage());
     }
     callStack.remove(path);
