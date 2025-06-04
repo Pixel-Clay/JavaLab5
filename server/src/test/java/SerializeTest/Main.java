@@ -4,7 +4,6 @@ import clay.vehicle.commands.Show;
 import clay.vehicle.dataStorage.CsvReader;
 import clay.vehicle.dataStorage.CsvWriter;
 import clay.vehicle.dataStorage.VehicleStorage;
-import clay.vehicle.vehicles.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,6 +58,6 @@ public class Main {
     }
 
     Show show = new Show(new_storage);
-    System.out.println(show.execute());
+    //    System.out.println(show.execute());
   }
 }
