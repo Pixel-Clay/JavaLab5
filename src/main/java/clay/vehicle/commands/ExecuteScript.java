@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,6 +21,8 @@ import java.util.regex.Pattern;
 public class ExecuteScript extends ExecutableRequiresShell {
   /** The command processor used to execute script commands */
   CommandProcessor processor;
+
+  static List<Path> callStack = new ArrayList<>();
 
   /**
    * Constructs a new ExecuteScript command with the specified command processor. Creates a new
@@ -39,16 +43,19 @@ public class ExecuteScript extends ExecutableRequiresShell {
    * @return a message indicating the result of script execution
    */
   @Override
-  public String execute(String[] args) {
+  public String execute(String[] args) throws RecursionException {
     processor.clearQueue();
     shell.setRecordedInputFlag();
 
     Path path;
     String script;
-    try {
-      path = Path.of(args[0]);
-    } catch (ArrayIndexOutOfBoundsException e) {
-      return "! Not enough arguments";
+
+    if (args.length < 1) return "! Not enough arguments";
+
+    path = Path.of(args[0]);
+
+    if (callStack.contains(path)) {
+      throw new RecursionException(callStack.toString());
     }
 
     try (FileInputStream fis = new FileInputStream(path.toFile());
@@ -79,7 +86,7 @@ public class ExecuteScript extends ExecutableRequiresShell {
 
         if (Objects.equals(l.split(" ")[0], "execute_script")) {
           Matcher matcher = pattern.matcher(l.replace("\\", "/"));
-          if (matcher.find()) return "! Recursion not allowed";
+          if (matcher.find()) throw new RecursionException(callStack.toString());
         }
 
         processor.addInstruction(l);
@@ -90,11 +97,16 @@ public class ExecuteScript extends ExecutableRequiresShell {
     }
 
     try {
+      callStack.add(path);
       processor.run();
     } catch (InvalidInstructionException e) {
+      callStack.remove(path);
       return "Invalid command at line " + e.getMessage();
+    } catch (RecursionException e) {
+      callStack.clear();
+      throw new RecursionException(e.getMessage());
     }
-
+    callStack.remove(path);
     return "\nScript executed successfully";
   }
 }
