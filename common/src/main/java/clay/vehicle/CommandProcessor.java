@@ -1,6 +1,7 @@
 package clay.vehicle;
 
 import clay.vehicle.commands.Executable;
+import clay.vehicle.commands.MiscUtils;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +31,7 @@ public class CommandProcessor {
    * @param cmd The executable command to attach
    * @param name The name/keyword that will be used to invoke this command
    */
-  void attachCommand(Executable cmd, String name) {
+  public void attachCommand(Executable cmd, String name) {
     commands.put(name, cmd);
   }
 
@@ -64,5 +65,24 @@ public class CommandProcessor {
             curCommand.execute(Arrays.copyOfRange(splitInstruction, 1, splitInstruction.length)));
     }
     instructions.clear();
+  }
+
+  public String runReturnable() throws InvalidInstructionException {
+    String instruction;
+    StringBuilder builder = new StringBuilder();
+    for (Integer idx = 0; idx < instructions.toArray().length; idx++) {
+      instruction = instructions.get(idx);
+      String[] splitInstruction = MiscUtils.splitQuoted(instruction);
+      Executable curCommand = commands.get(splitInstruction[0]);
+      if (curCommand == null) {
+        instructions.clear();
+        throw new InvalidInstructionException(String.valueOf(idx + 1) + ": " + instruction);
+      } else
+        builder.append(
+            curCommand.execute(Arrays.copyOfRange(splitInstruction, 1, splitInstruction.length)));
+      builder.append("\n");
+    }
+    instructions.clear();
+    return builder.toString();
   }
 }

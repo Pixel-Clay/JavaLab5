@@ -7,16 +7,19 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.util.Set;
 import lombok.Setter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ServerNetworkingManager {
   private final DatagramChannel channel;
   private final Selector selector;
   private final ByteBuffer receiveBuffer;
   private final ByteBuffer sendBuffer;
+  private final InetSocketAddress socket;
   private boolean running;
+  private static final Logger logger = LogManager.getLogger(ServerNetworkingManager.class);
 
   @Setter private ServerProcessingCallback readCallback;
   @Setter private ServerProcessingCallback writeCallback;
@@ -24,7 +27,8 @@ public class ServerNetworkingManager {
   public ServerNetworkingManager(int port) throws IOException {
     this.channel = DatagramChannel.open();
     this.channel.configureBlocking(false);
-    this.channel.bind(new InetSocketAddress(port));
+    this.socket = new InetSocketAddress(port);
+    this.channel.bind(this.socket);
 
     this.selector = Selector.open();
     this.channel.register(selector, SelectionKey.OP_READ);
@@ -34,20 +38,17 @@ public class ServerNetworkingManager {
     this.running = true;
   }
 
-  public void start() throws IOException {
+  public void run() throws IOException {
+    logger.info("Server running on port " + String.valueOf(getRunningPort()));
     while (running) {
       selector.select();
       Set<SelectionKey> selectedKeys = selector.selectedKeys();
-      // Iterator<SelectionKey> iter = selectedKeys.iterator();
 
       for (var iter = selectedKeys.iterator(); iter.hasNext(); ) {
         SelectionKey key = iter.next();
         iter.remove();
 
         if (key.isValid()) {
-          if (key.isAcceptable()) {
-            handleAccept(key);
-          }
           if (key.isReadable()) {
             handleRead(key);
           }
@@ -57,12 +58,6 @@ public class ServerNetworkingManager {
         }
       }
     }
-  }
-
-  private void handleAccept(SelectionKey key) throws IOException {
-    var sc = (DatagramChannel) key.channel();
-    sc.configureBlocking(false);
-    sc.register(key.selector(), SelectionKey.OP_READ);
   }
 
   private void handleRead(SelectionKey key) throws IOException {
@@ -76,23 +71,28 @@ public class ServerNetworkingManager {
       receiveBuffer.flip();
       int receivedLength = receiveBuffer.limit();
       String receivedMessage = new String(receiveBuffer.array(), 0, receivedLength);
+      NetworkMessage message =
+          NetworkMessageDeserializer.deserialize(receivedMessage, clientAddress);
 
-      key.attach(this.readCallback.execute());
+      logger.info("Received from " + message.getAddress() + " " + receivedMessage);
+
+      key.attach(this.readCallback.execute(message));
     }
   }
 
   private void handleWrite(SelectionKey key) throws IOException {
-    var sc = (SocketChannel) key.channel();
-
-    //        sc.write() //TODO: fix
-  }
-
-  public void transmit(NetworkMessage message) throws IOException {
+    var dc = (DatagramChannel) key.channel();
+    NetworkMessage message = (NetworkMessage) key.attachment();
     sendBuffer.clear();
-    byte[] responseBytes = message.getMessage().getBytes();
+    byte[] responseBytes = NetworkMessageSerializer.serialize(message).getBytes();
     sendBuffer.put(responseBytes);
     sendBuffer.flip();
-    channel.send(sendBuffer, message.getAddress());
+
+    if (message.hasAddress()) {
+      logger.info("Sending reply to " + message.getAddress());
+      dc.send(sendBuffer, message.getAddress());
+    } else logger.warn("no address: " + NetworkMessageSerializer.serialize(message));
+    dc.register(key.selector(), SelectionKey.OP_READ);
   }
 
   public void stop() {
@@ -103,5 +103,9 @@ public class ServerNetworkingManager {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public int getRunningPort() {
+    return this.socket.getPort();
   }
 }

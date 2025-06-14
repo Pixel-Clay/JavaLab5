@@ -1,5 +1,5 @@
 package clay.vehicle.networking;
 
 public interface ServerProcessingCallback {
-  public Object execute();
+  public Object execute(NetworkMessage o);
 }
