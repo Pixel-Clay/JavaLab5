@@ -9,7 +9,7 @@ import java.util.Optional;
  * one vehicle from the storage that has the specified engine power. If multiple vehicles have the
  * same engine power, only one is removed.
  */
-public class RemoveAnyByEnginePower extends ExecutableRequiresShell {
+public class RemoveAnyByEnginePower implements Executable {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 

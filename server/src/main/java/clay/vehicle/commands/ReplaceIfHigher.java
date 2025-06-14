@@ -3,12 +3,13 @@ package clay.vehicle.commands;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
+import java.util.Arrays;
 
 /**
  * Command implementation for replacing a vehicle if the new one is greater. This command replaces
  * an existing vehicle with a new one only if the new vehicle is greater than the existing one.
  */
-public class ReplaceIfHigher extends ExecutableRequiresShell {
+public class ReplaceIfHigher implements Executable {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 
@@ -40,7 +41,7 @@ public class ReplaceIfHigher extends ExecutableRequiresShell {
     }
     Vehicle replace;
     try {
-      replace = MiscUtils.getaVehicleFromInput(shell, storage);
+      replace = MiscUtils.getaVehicleFromArgs(Arrays.copyOfRange(args, 1, args.length), storage);
     } catch (ValidationException e) {
       return "! Format error: " + e.getMessage();
     }

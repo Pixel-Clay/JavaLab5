@@ -8,7 +8,7 @@ import jakarta.validation.ValidationException;
  * Command implementation for inserting a new vehicle into the storage. This command prompts the
  * user for vehicle details and adds the new vehicle to the storage if all validations pass.
  */
-public class Insert extends ExecutableRequiresShell {
+public class Insert implements Executable {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 
@@ -32,7 +32,7 @@ public class Insert extends ExecutableRequiresShell {
   public String execute(String[] args) {
     Vehicle v;
     try {
-      v = MiscUtils.getaVehicleFromInput(shell, storage);
+      v = MiscUtils.getaVehicleFromArgs(args, storage);
     } catch (ValidationException e) {
       return "! Format error: " + e.getMessage();
     }

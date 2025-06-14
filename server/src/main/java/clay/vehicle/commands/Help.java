@@ -4,7 +4,7 @@ package clay.vehicle.commands;
  * Command implementation for displaying help information. This command provides information about
  * available commands and their usage.
  */
-public class Help extends ExecutableRequiresShell {
+public class Help implements Executable {
 
   /**
    * Executes the help command. Returns a string containing help information about * available
@@ -23,9 +23,8 @@ public class Help extends ExecutableRequiresShell {
                 update id {element}: обновить значение элемента коллекции, id которого равен заданному
                 remove_key id: удалить элемент из коллекции по его ключу
                 clear: очистить коллекцию
-                save: сохранить коллекцию в файл
                 execute_script file_name: считать и исполнить скрипт из указанного файла. В скрипте содержатся команды в таком же виде, в котором их вводит пользователь в интерактивном режиме.
-                exit: завершить программу (без сохранения в файл)
+                exit: завершить клиент
                 remove_lower {element}: удалить из коллекции все элементы, меньшие, чем заданный
                 replace_if_greater id {element}: заменить значение по ключу, если новое значение больше старого
                 remove_lower_key id: удалить из коллекции все элементы, ключ которых меньше, чем заданный

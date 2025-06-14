@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * prompts for an example vehicle and removes all vehicles from the storage that are less than the
  * example according to their natural ordering.
  */
-public class RemoveLower extends ExecutableRequiresShell {
+public class RemoveLower implements Executable {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 
@@ -35,7 +35,7 @@ public class RemoveLower extends ExecutableRequiresShell {
   public String execute(String[] args) {
     Vehicle example;
     try {
-      example = MiscUtils.getaVehicleFromInput(shell, storage);
+      example = MiscUtils.getaVehicleFromArgs(args, storage);
     } catch (ValidationException e) {
       return "! Format error: " + e.getMessage();
     }

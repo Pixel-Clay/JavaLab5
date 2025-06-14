@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * Command implementation for removing vehicles with IDs less than a specified value. This command
  * removes all vehicles from the storage that have an ID less than the provided ID value.
  */
-public class RemoveLowerKey extends ExecutableRequiresShell {
+public class RemoveLowerKey implements Executable {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 

@@ -7,7 +7,7 @@ import clay.vehicle.vehicles.Vehicle;
  * Command implementation for displaying vehicles in ascending order. This command shows all
  * vehicles in the storage sorted by their natural ordering.
  */
-public class PrintAscending extends ExecutableRequiresShell {
+public class PrintAscending implements Executable {
   /** The storage instance containing the vehicles to display */
   VehicleStorage storage;
 

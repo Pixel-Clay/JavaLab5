@@ -9,7 +9,7 @@ import java.nio.file.Path;
  * Command implementation for saving the vehicle storage to a CSV file. This command writes all
  * vehicles in the storage to a CSV file at the specified path.
  */
-public class Save extends ExecutableRequiresShell {
+public class Save implements Executable {
   /** The storage instance containing the vehicles to save */
   VehicleStorage storage;
 

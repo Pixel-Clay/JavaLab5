@@ -1,22 +1,22 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.dataStorage.VehicleStorage;
+import clay.vehicle.dataStorage.Storage;
 
 /**
  * Command implementation for clearing the vehicle storage. This command removes all vehicles from
  * the storage.
  */
-public class Clear extends ExecutableRequiresShell {
+public class Clear implements Executable {
 
   /** The storage instance to be cleared */
-  VehicleStorage storage;
+  Storage storage;
 
   /**
    * Constructs a new Clear command with the specified storage.
    *
    * @param storage the storage to be cleared
    */
-  public Clear(VehicleStorage storage) {
+  public Clear(Storage storage) {
     this.storage = storage;
   }
 

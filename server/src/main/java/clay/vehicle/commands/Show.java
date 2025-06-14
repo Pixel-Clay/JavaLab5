@@ -6,7 +6,7 @@ import clay.vehicle.dataStorage.VehicleStorage;
  * Command implementation for displaying all vehicles in the storage. This command shows all
  * vehicles in the storage with their IDs and details.
  */
-public class Show extends ExecutableRequiresShell {
+public class Show implements Executable {
   /** The storage instance containing the vehicles to display */
   VehicleStorage storage;
 

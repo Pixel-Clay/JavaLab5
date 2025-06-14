@@ -3,16 +3,15 @@ package clay.vehicle.commands;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Coordinates;
 import clay.vehicle.vehicles.Vehicle;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Command implementation for grouping vehicles by their coordinates and counting them. This command
  * groups all vehicles in the storage by their coordinates and returns a count of vehicles for each
  * unique coordinate value.
  */
-public class GroupCountungByCoordinates extends ExecutableRequiresShell {
+public class GroupCountungByCoordinates implements Executable {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 
@@ -34,25 +33,12 @@ public class GroupCountungByCoordinates extends ExecutableRequiresShell {
    */
   @Override
   public String execute(String[] args) {
-    Collection<Vehicle> vehicles = storage.getValues();
-    HashMap<Coordinates, ArrayList<Vehicle>> groups = new HashMap<>();
-    for (Vehicle v : vehicles) {
-      if (!groups.containsKey(v.getCoordinates())) {
-        groups.put(v.getCoordinates(), new ArrayList<>());
-        groups.get(v.getCoordinates()).add(v);
-      } else {
-        groups.get(v.getCoordinates()).add(v);
-      }
-    }
+    Map<Coordinates, Long> groups =
+        storage.getValues().stream()
+            .collect(Collectors.groupingBy(Vehicle::getCoordinates, Collectors.counting()));
 
-    StringBuilder builder = new StringBuilder();
-
-    for (Coordinates c : groups.keySet()) {
-      builder.append(c.toString());
-      builder.append(": ");
-      builder.append(groups.get(c).size());
-      builder.append("\n");
-    }
-    return builder.toString();
+    return groups.entrySet().stream()
+        .map(entry -> entry.getKey() + ": " + entry.getValue())
+        .collect(Collectors.joining("\n"));
   }
 }

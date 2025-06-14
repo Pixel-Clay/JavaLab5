@@ -7,7 +7,7 @@ import clay.vehicle.vehicles.Vehicle;
  * Command implementation for removing a vehicle by its key. This command removes a vehicle from the
  * storage using its key (ID).
  */
-public class RemoveKey extends ExecutableRequiresShell {
+public class RemoveKey implements Executable {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 

@@ -6,7 +6,7 @@ import clay.vehicle.dataStorage.VehicleStorage;
  * Command implementation for displaying information about the vehicle storage. This command shows
  * the initialization date, type, and number of vehicles in the storage.
  */
-public class Info extends ExecutableRequiresShell {
+public class Info implements Executable {
   /** The storage instance to get information about */
   VehicleStorage storage;
 

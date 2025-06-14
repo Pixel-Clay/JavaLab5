@@ -3,13 +3,14 @@ package clay.vehicle.commands;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
+import java.util.Arrays;
 
 /**
  * Command implementation for updating an existing vehicle. This command updates a vehicle with the
  * specified ID by replacing it with a new vehicle that has the same ID but potentially different
  * attributes.
  */
-public class Update extends ExecutableRequiresShell {
+public class Update implements Executable {
   /** The storage instance where vehicles are stored */
   VehicleStorage storage;
 
@@ -42,7 +43,7 @@ public class Update extends ExecutableRequiresShell {
 
     Vehicle update;
     try {
-      update = MiscUtils.getaVehicleFromInput(shell, storage);
+      update = MiscUtils.getaVehicleFromArgs(Arrays.copyOfRange(args, 1, args.length), storage);
     } catch (ValidationException e) {
       return "! Format error: " + e.getMessage();
     }
