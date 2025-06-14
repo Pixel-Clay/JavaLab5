@@ -1,7 +1,7 @@
 package clay.vehicle.commands;
 
+import clay.vehicle.ClientShell;
 import clay.vehicle.CommandProcessor;
-import clay.vehicle.InvalidInstructionException;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,9 +18,11 @@ import java.util.regex.Pattern;
  * reads a script file line by line and executes each command in sequence. The script file should
  * contain one command per line.
  */
-public class ExecuteScript extends ExecutableRequiresShell {
+public class ExecuteScript implements Executable {
   /** The command processor used to execute script commands */
   CommandProcessor processor;
+
+  ClientShell shell;
 
   static List<Path> callStack = new ArrayList<>();
 
@@ -30,9 +32,9 @@ public class ExecuteScript extends ExecutableRequiresShell {
    *
    * @param processor the command processor whose commands will be used
    */
-  public ExecuteScript(CommandProcessor processor) {
-    this.processor = new CommandProcessor();
-    this.processor.setCommands(processor.getCommands());
+  public ExecuteScript(CommandProcessor processor, ClientShell shell) {
+    this.processor = processor;
+    this.shell = shell;
   }
 
   /**
@@ -44,7 +46,6 @@ public class ExecuteScript extends ExecutableRequiresShell {
    */
   @Override
   public String execute(String[] args) throws RecursionException {
-    processor.clearQueue();
     shell.setRecordedInputFlag();
 
     Path path;
@@ -56,7 +57,7 @@ public class ExecuteScript extends ExecutableRequiresShell {
 
     if (callStack.contains(path)) {
       throw new RecursionException(callStack.toString());
-    }
+    } else callStack.add(path);
 
     try (FileInputStream fis = new FileInputStream(path.toFile());
         BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
@@ -98,15 +99,12 @@ public class ExecuteScript extends ExecutableRequiresShell {
 
     try {
       callStack.add(path);
-      processor.run();
-    } catch (InvalidInstructionException e) {
-      callStack.remove(path);
-      return "Invalid command at line " + e.getMessage();
+
     } catch (RecursionException e) {
       callStack.clear();
       throw new RecursionException(e.getMessage());
     }
     callStack.remove(path);
-    return "\nScript executed successfully";
+    return "! Running script...";
   }
 }
