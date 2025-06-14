@@ -5,10 +5,27 @@ import lombok.Getter;
 
 @Getter
 public class NetworkMessage {
-  private MessageType type;
-  private String message;
   private SocketAddress address;
+  private MessageType type;
+  private String command;
   private String[] args;
+  private String message;
+
+  public boolean hasMessage() {
+    return message != null;
+  }
+
+  public boolean hasAddress() {
+    return address != null;
+  }
+
+  public boolean hasArgs() {
+    return args != null;
+  }
+
+  public boolean hasCommand() {
+    return command != null;
+  }
 
   private NetworkMessage() {}
 
@@ -36,6 +53,11 @@ public class NetworkMessage {
 
     public Builder setArgs(String[] args) {
       NetworkMessage.this.args = args;
+      return this;
+    }
+
+    public Builder setCommand(String command) {
+      NetworkMessage.this.command = command;
       return this;
     }
 

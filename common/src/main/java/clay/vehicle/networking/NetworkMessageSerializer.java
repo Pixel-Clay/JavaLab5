@@ -1,8 +1,8 @@
 package clay.vehicle.networking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.InetSocketAddress;
 
 public class NetworkMessageSerializer {
@@ -16,6 +16,9 @@ public class NetworkMessageSerializer {
       }
       if (message.getMessage() != null) {
         node.put("message", message.getMessage());
+      }
+      if (message.getCommand() != null) {
+        node.put("command", message.getCommand());
       }
       if (message.getAddress() != null && message.getAddress() instanceof InetSocketAddress) {
         InetSocketAddress addr = (InetSocketAddress) message.getAddress();

@@ -13,7 +13,7 @@ import lombok.Setter;
  * an initialization date for the storage and supports serialization.
  */
 @JsonSerialize(using = VehicleStorageSerializer.class)
-public class VehicleStorage implements Comparable<VehicleStorage> {
+public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
 
   /** The initialization date of this storage */
   @Getter @Setter private ZonedDateTime initDate;

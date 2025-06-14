@@ -19,6 +19,9 @@ public class NetworkMessageDeserializer {
       if (node.hasNonNull("message")) {
         builder.setMessage(node.get("message").asText());
       }
+      if (node.hasNonNull("command")) {
+        builder.setCommand(node.get("command").asText());
+      }
       if (node.hasNonNull("address")) {
         String addrStr = node.get("address").asText();
         String[] parts = addrStr.split(":");
@@ -36,7 +39,40 @@ public class NetworkMessageDeserializer {
           args[i] = argsNode.get(i).asText();
         }
         builder.setArgs(args);
+      } else {
+        builder.setArgs(null);
       }
+      return builder.build();
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to deserialize NetworkMessage", e);
+    }
+  }
+
+  public static NetworkMessage deserialize(String json, SocketAddress address) {
+    try {
+      JsonNode node = objectMapper.readTree(json);
+      NetworkMessage.Builder builder = NetworkMessage.newBuilder();
+
+      if (node.hasNonNull("type")) {
+        builder.setType(MessageType.valueOf(node.get("type").asText()));
+      }
+      if (node.hasNonNull("message")) {
+        builder.setMessage(node.get("message").asText());
+      }
+      if (node.hasNonNull("command")) {
+        builder.setCommand(node.get("command").asText());
+      }
+      if (address != null) {
+        builder.setAdress(address);
+      }
+      if (node.hasNonNull("args") && node.get("args").isArray()) {
+        JsonNode argsNode = node.get("args");
+        String[] args = new String[argsNode.size()];
+        for (int i = 0; i < argsNode.size(); i++) {
+          args[i] = argsNode.get(i).asText();
+        }
+        builder.setArgs(args);
+      } else builder.setArgs(null);
       return builder.build();
     } catch (Exception e) {
       throw new RuntimeException("Failed to deserialize NetworkMessage", e);
