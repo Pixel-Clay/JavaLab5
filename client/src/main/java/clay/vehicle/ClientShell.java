@@ -5,6 +5,7 @@ import clay.vehicle.commands.RecursionException;
 import clay.vehicle.networking.ClientNetworkingManager;
 import clay.vehicle.networking.NetworkMessageDeserializer;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
@@ -17,7 +18,7 @@ import lombok.Getter;
 public class ClientShell implements Shell {
   Scanner scanner = new Scanner(System.in);
 
-  @Getter CommandProcessor processor = new CommandProcessor();
+  @Getter CommandProcessor processor;
 
   private ClientNetworkingManager nm;
 
@@ -25,6 +26,10 @@ public class ClientShell implements Shell {
   private Boolean recordedInputFlag = false;
 
   private Queue<String> recordedInputBuffer = new LinkedList<>();
+
+  public ClientShell(CommandProcessor commandProcessor) {
+    this.processor = commandProcessor;
+  }
 
   public void attachNetworking(ClientNetworkingManager nm) {
     this.nm = nm;
@@ -116,10 +121,15 @@ public class ClientShell implements Shell {
         for (String cmd : ret.split("\n")) {
           if (cmd.charAt(0) == '!') System.out.println(cmd);
           else {
-
             nm.transmit(cmd);
-
-            System.out.println(NetworkMessageDeserializer.deserialize(nm.receive()).getMessage());
+            try {
+              System.out.println(NetworkMessageDeserializer.deserialize(nm.receive()).getMessage());
+            } catch (SocketTimeoutException e) {
+              System.out.println(
+                  "! Server did not respond within 5 seconds. Please try again. womp womp.");
+            } catch (IOException e) {
+              System.out.println("! IO exception: " + e.getMessage());
+            }
           }
         }
       } catch (InvalidInstructionException e) {

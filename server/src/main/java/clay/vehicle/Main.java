@@ -99,6 +99,7 @@ public class Main {
 
     try {
       networkingManager = new ServerNetworkingManager(Integer.parseInt(args[0]));
+      networkingManager.init();
     } catch (BindException e) {
       logger.error("Specified port in use, try another one. Exiting...");
       System.exit(-5);

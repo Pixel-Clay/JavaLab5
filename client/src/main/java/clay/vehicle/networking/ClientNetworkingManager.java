@@ -6,17 +6,29 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
 public class ClientNetworkingManager {
-  byte[] send;
-  byte[] receive;
-  DatagramChannel dc;
-  ByteBuffer snd, rec;
-  SocketAddress addr;
+  private byte[] send;
+  private byte[] receive;
+  private DatagramChannel dc;
+  private ByteBuffer snd;
+  private SocketAddress addr;
+  private String hostname;
+  private int port;
 
-  public ClientNetworkingManager(String hostname, int port)
-      throws UnknownHostException, IOException {
-    this.addr = new InetSocketAddress(Inet4Address.getByName(hostname), port);
+  public ClientNetworkingManager(String hostname, int port) {
     this.receive = new byte[65507]; // максимальный размер UDP пакета
+    this.hostname = hostname;
+    this.port = port;
+  }
+
+  public void init() throws UnknownHostException, IOException {
+    this.addr = new InetSocketAddress(Inet4Address.getByName(hostname), port);
     this.dc = DatagramChannel.open();
+    this.dc.configureBlocking(true); // Ensure blocking mode
+  }
+
+  public void setTimeout(int timeMs) throws SocketException, IOException {
+    dc.socket().setSoTimeout(timeMs);
+    dc.configureBlocking(true);
   }
 
   public void transmit(String message) throws IOException {
@@ -26,11 +38,10 @@ public class ClientNetworkingManager {
     snd.clear();
   }
 
-  public String receive() throws IOException {
-    rec = ByteBuffer.wrap(receive);
-    dc.receive(rec);
-    rec.flip();
-    int receivedLength = rec.limit();
-    return new String(receive, 0, receivedLength);
+  public String receive() throws SocketTimeoutException, IOException {
+    DatagramPacket dp = new DatagramPacket(receive, receive.length);
+    dc.socket().receive(dp);
+
+    return new String(dp.getData(), 0, dp.getLength());
   }
 }

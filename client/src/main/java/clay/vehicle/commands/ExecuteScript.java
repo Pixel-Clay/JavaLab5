@@ -31,6 +31,7 @@ public class ExecuteScript implements Executable {
    * command processor that shares the same command mappings as the provided one.
    *
    * @param processor the command processor whose commands will be used
+   * @param shell the shell used to manipulate data input
    */
   public ExecuteScript(CommandProcessor processor, ClientShell shell) {
     this.processor = processor;

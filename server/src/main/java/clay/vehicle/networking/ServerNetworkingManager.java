@@ -13,26 +13,29 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ServerNetworkingManager {
-  private final DatagramChannel channel;
-  private final Selector selector;
-  private final ByteBuffer receiveBuffer;
-  private final ByteBuffer sendBuffer;
-  private final InetSocketAddress socket;
+  private DatagramChannel channel;
+  private Selector selector;
+  private ByteBuffer receiveBuffer;
+  private ByteBuffer sendBuffer;
+  private InetSocketAddress socket;
   private boolean running;
+  private final int port;
   private static final Logger logger = LogManager.getLogger(ServerNetworkingManager.class);
 
   @Setter private ServerProcessingCallback readCallback;
   @Setter private ServerProcessingCallback writeCallback;
 
-  public ServerNetworkingManager(int port) throws IOException {
+  public ServerNetworkingManager(int port) {
+    this.port = port;
+  }
+
+  public void init() throws IOException {
     this.channel = DatagramChannel.open();
     this.channel.configureBlocking(false);
     this.socket = new InetSocketAddress(port);
     this.channel.bind(this.socket);
-
     this.selector = Selector.open();
     this.channel.register(selector, SelectionKey.OP_READ);
-
     this.receiveBuffer = ByteBuffer.allocate(65507); // максимальный размер UDP пакета
     this.sendBuffer = ByteBuffer.allocate(65507);
     this.running = true;
@@ -84,8 +87,7 @@ public class ServerNetworkingManager {
     var dc = (DatagramChannel) key.channel();
     NetworkMessage message = (NetworkMessage) key.attachment();
     sendBuffer.clear();
-    byte[] responseBytes = NetworkMessageSerializer.serialize(message).getBytes();
-    sendBuffer.put(responseBytes);
+    sendBuffer.put(NetworkMessageSerializer.serialize(message).getBytes());
     sendBuffer.flip();
 
     if (message.hasAddress()) {

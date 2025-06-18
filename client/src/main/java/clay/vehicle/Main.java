@@ -47,8 +47,8 @@ public class Main {
       System.out.println("! Invalid port");
       System.exit(-1);
     }
-
-    ClientShell shell = new ClientShell();
+    CommandProcessor processor = new CommandProcessor();
+    ClientShell shell = new ClientShell(processor);
 
     shell.attachCommand(new Exit(shell), "exit");
     shell.attachCommand(new Info(), "info");
@@ -58,7 +58,7 @@ public class Main {
     shell.attachCommand(new Insert(shell), "insert");
     shell.attachCommand(new Update(shell), "update");
     shell.attachCommand(new Clear(), "clear");
-    shell.attachCommand(new ExecuteScript(shell.getProcessor(), shell), "execute_script");
+    shell.attachCommand(new ExecuteScript(processor, shell), "execute_script");
     shell.attachCommand(new RemoveLower(shell), "remove_lower");
     shell.attachCommand(new ReplaceIfHigher(shell), "replace_if_greater");
     shell.attachCommand(new RemoveLowerKey(), "remove_lower_key");
@@ -67,6 +67,8 @@ public class Main {
     shell.attachCommand(new GroupCountungByCoordinates(), "group_counting_by_coordinates");
     try {
       networkingManager = new ClientNetworkingManager(hostname, port);
+      networkingManager.init();
+      networkingManager.setTimeout(5000);
     } catch (UnknownHostException e) {
       System.out.println("! Invalid hostname");
       System.exit(-2);
@@ -76,7 +78,6 @@ public class Main {
     }
 
     shell.attachNetworking(networkingManager);
-
     shell.run();
   }
 }
