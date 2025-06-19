@@ -37,10 +37,8 @@ public class MiscUtils {
         x = Double.parseDouble(inp.replace(",", "."));
         if (Double.isInfinite(x)) {
           System.out.println("! Value can't be infinite");
-          continue;
         } else if (x.isNaN()) {
           System.out.println("! Value can't be NaN");
-          continue;
         } else break;
       } catch (NumberFormatException e) {
         System.out.println("! Not a number");
@@ -151,45 +149,6 @@ public class MiscUtils {
     return inp;
   }
 
-  /**
-   * Creates a new Vehicle from user input. Prompts the user for all required vehicle attributes and
-   * validates them.
-   *
-   * @param shell the shell instance for input/output
-   * @param storage the storage instance to get the next available ID
-   * @return a new Vehicle with the entered attributes
-   * @throws ValidationException if the entered attributes don't satisfy validation constraints
-   */
-  public static Vehicle getaVehicleFromInput(Shell shell, VehicleStorage storage)
-      throws ValidationException {
-    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    Validator validator = factory.getValidator();
-
-    String name = getaStringNotNull(shell, "name: ");
-    Double x = getaDoubleNotNull(shell, "x coordinate: ");
-    Double y = getaDoubleNotNull(shell, "y coordinate: ");
-    Float enginePower = getaFloatNotNull(shell, "engine power: ");
-    Float distanceTravelled = getaFloatNotNull(shell, "distance travelled: ");
-    VehicleType vehicleType =
-        getaVehicleType(shell, "vehicle type (car, plane, helicopter, hoverboard, spaceship): ");
-    FuelType fuelType = getaFuelTypeNotNull(shell, "fuel type (alcohol, manpower, nuclear): ");
-
-    Vehicle v =
-        new Vehicle(
-            storage.getNextId(),
-            name,
-            new Coordinates(x, y),
-            ZonedDateTime.now(),
-            enginePower,
-            distanceTravelled,
-            vehicleType,
-            fuelType);
-
-    Set<ConstraintViolation<Vehicle>> violations = validator.validate(v);
-    if (!violations.isEmpty()) throw new ValidationException(violations.toString());
-    else return v;
-  }
-
   public static Vehicle getaVehicleFromArgs(String[] args, VehicleStorage storage)
       throws ValidationException {
 
@@ -203,6 +162,13 @@ public class MiscUtils {
 
     Vehicle v;
 
+    VehicleType vt;
+    try {
+      vt = VehicleType.valueOf(args[5]);
+    } catch (IllegalArgumentException e) {
+      vt = null;
+    }
+
     try {
       v =
           new Vehicle(
@@ -212,19 +178,11 @@ public class MiscUtils {
               ZonedDateTime.now(),
               Float.valueOf(args[3]),
               Float.valueOf(args[4]),
-              VehicleType.valueOf(args[5]),
-              FuelType.valueOf(args[6]));
-    } catch (IllegalArgumentException e) {
-      v =
-          new Vehicle(
-              storage.getNextId(),
-              args[0].substring(1, args[0].length() - 1),
-              new Coordinates(Double.valueOf(args[1]), Double.valueOf(args[2])),
-              ZonedDateTime.now(),
-              Float.valueOf(args[3]),
-              Float.valueOf(args[4]),
-              null,
-              FuelType.valueOf(args[6]));
+              vt,
+              FuelType.valueOf(args[6]),
+              0);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
     Set<ConstraintViolation<Vehicle>> violations = validator.validate(v);
     if (!violations.isEmpty()) throw new ValidationException(violations.toString());
@@ -253,7 +211,8 @@ public class MiscUtils {
             enginePower,
             distanceTravelled,
             vehicleType,
-            fuelType);
+            fuelType,
+            0);
 
     Set<ConstraintViolation<Vehicle>> violations = validator.validate(v);
     if (!violations.isEmpty()) throw new ValidationException(violations.toString());

@@ -2,6 +2,7 @@ package clay.vehicle.commands;
 
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
+import java.sql.SQLException;
 import java.util.Optional;
 
 /**
@@ -33,7 +34,7 @@ public class RemoveAnyByEnginePower implements Executable {
   public String execute(String[] args) {
     if (args.length == 0) return "! Not enough arguments";
 
-    Float enginePower;
+    float enginePower;
     try {
       enginePower = Float.parseFloat(args[0]);
     } catch (NumberFormatException e) {
@@ -48,8 +49,12 @@ public class RemoveAnyByEnginePower implements Executable {
 
     if (lowerIds.isEmpty()) return "Removed 0 items";
     else {
-      storage.removeKey(Integer.valueOf(String.valueOf(lowerIds)));
-      return "Removed 1 item";
+      try {
+        storage.removeKey(Integer.parseInt(String.valueOf(lowerIds)));
+        return "Removed 1 item";
+      } catch (SQLException e) {
+        return "! Database error: " + e.getMessage();
+      }
     }
   }
 }

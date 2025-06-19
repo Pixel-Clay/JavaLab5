@@ -2,6 +2,7 @@ package clay.vehicle.commands;
 
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
+import java.sql.SQLException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,9 +49,13 @@ public class RemoveLowerKey implements Executable {
             .map(Vehicle::getId)
             .collect(Collectors.toSet());
 
-    for (Integer i : lowerIds) {
-      storage.removeKey(i);
-      counter++;
+    try {
+      for (Integer i : lowerIds) {
+        storage.removeKey(i);
+        counter++;
+      }
+    } catch (SQLException e) {
+      return "! Database error: " + e.getMessage();
     }
 
     return "Removed " + counter + " items";

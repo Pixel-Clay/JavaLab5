@@ -2,6 +2,7 @@ package clay.vehicle.dataStorage;
 
 import clay.vehicle.vehicles.Vehicle;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import lombok.Getter;
@@ -15,6 +16,8 @@ import lombok.Setter;
 @JsonSerialize(using = VehicleStorageSerializer.class)
 public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
 
+  private final PgStoreManager db;
+
   /** The initialization date of this storage */
   @Getter @Setter private ZonedDateTime initDate;
 
@@ -22,8 +25,9 @@ public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
   @Getter @Setter private Map<Integer, Vehicle> storage = new HashMap<>();
 
   /** Constructs a new VehicleStorage with the current date and time as initialization date. */
-  public VehicleStorage() {
+  public VehicleStorage(PgStoreManager db) {
     this.initDate = ZonedDateTime.now();
+    this.db = db;
   }
 
   /**
@@ -31,7 +35,8 @@ public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
    *
    * @param vehicle the vehicle to insert
    */
-  public void insert(Vehicle vehicle) {
+  public void insert(Vehicle vehicle) throws SQLException {
+    db.insert(vehicle);
     this.storage.put(vehicle.getId(), vehicle);
   }
 
@@ -60,7 +65,8 @@ public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
    * @param id the ID of the vehicle to remove
    * @return the removed vehicle, or null if not found
    */
-  public Vehicle removeKey(int id) {
+  public Vehicle removeKey(int id) throws SQLException {
+    db.removeKey(id);
     return this.storage.remove(id);
   }
 
@@ -70,7 +76,8 @@ public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
    * @param id the ID of the vehicle to update
    * @param vehicle the new vehicle data
    */
-  public void updateElement(int id, Vehicle vehicle) {
+  public void updateElement(int id, Vehicle vehicle) throws SQLException {
+    db.update(id, vehicle);
     this.storage.put(id, vehicle);
   }
 
@@ -116,21 +123,21 @@ public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
    *
    * @return the next available ID
    */
-  public int getNextId() {
-    int nextId;
-    try {
-      nextId = Collections.max(this.storage.keySet().stream().toList()) + 1;
-    } catch (NoSuchElementException e) {
-      nextId = 1;
-    }
-    return nextId;
+  public int getNextId() throws SQLException {
+    return db.nextVehicleId();
   }
 
   /**
    * Clears all vehicles from the storage. This method creates a new empty HashMap to replace the
    * current storage.
    */
-  public void clearCollection() {
+  public void clearCollection() throws SQLException {
+    db.truncateVehicles();
+    db.resetVehicleIDs();
+    this.storage = new HashMap<>();
+  }
+
+  void clearLocalCollection() {
     this.storage = new HashMap<>();
   }
 

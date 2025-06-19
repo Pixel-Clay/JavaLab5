@@ -1,16 +1,19 @@
 package clay.vehicle;
 
 import clay.vehicle.commands.*;
-import clay.vehicle.dataStorage.CsvReader;
 import clay.vehicle.dataStorage.EnvPathRetriever;
 import clay.vehicle.dataStorage.NoEnvVarFoundException;
+import clay.vehicle.dataStorage.PgStoreManager;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.networking.OnReadExecutionCallback;
 import clay.vehicle.networking.ServerNetworkingManager;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import sun.misc.Signal;
@@ -52,19 +55,31 @@ public class Main {
       logger.error("Env var not found, set one at $CLAY_VEHICLE_DATA_PATH");
       System.exit(-1);
     }
+
+    Properties info = new Properties();
     try {
-      newStorage = CsvReader.readVehicleStorageFromCsv(outputPath);
+      info.load(new FileInputStream(outputPath.toString()));
     } catch (FileNotFoundException e) {
-      logger.error("Database not found. Exiting...");
+      logger.error("Database config not found. Exiting...");
       System.exit(-2);
     } catch (IOException e) {
-      logger.error("Critical IO exception: " + e.getMessage() + ". Exiting...");
+      logger.error("Could not load database config: " + e.getMessage() + ". Exiting...");
       System.exit(-3);
     }
+
+    String jdbcUrl = "jdbc:postgresql://localhost:5432/studs";
+    PgStoreManager db = new PgStoreManager();
+    try {
+      db.connect(jdbcUrl, info);
+      newStorage = new VehicleStorage(db);
+      db.syncFromDB(newStorage);
+    } catch (SQLException e) {
+      logger.error("Could not connect to database: " + e.getMessage() + ". Exiting...");
+      System.exit(-3);
+    }
+
     logger.info(
         "Successfully loaded " + newStorage.getStorage().size() + " vehicles after validation");
-
-    Save saver = new Save(newStorage, outputPath);
 
     OnReadExecutionCallback executor = new OnReadExecutionCallback();
 
@@ -85,8 +100,13 @@ public class Main {
 
     SignalHandler handler =
         signal -> {
-          logger.info("Ctrl+C detected. Saving and shutting down...");
-          saver.execute(new String[] {});
+          logger.info("Ctrl+C detected.");
+          try {
+            db.disconnect();
+          } catch (SQLException e) {
+            logger.warn("Could not disconnect from db: " + e.getMessage());
+          }
+          logger.info("Stopping server...");
           System.exit(0); // Exit the program
         };
 

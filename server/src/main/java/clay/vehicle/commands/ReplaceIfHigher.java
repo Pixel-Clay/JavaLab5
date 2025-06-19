@@ -3,6 +3,7 @@ package clay.vehicle.commands;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
@@ -31,7 +32,7 @@ public class ReplaceIfHigher implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    Integer id;
+    int id;
     try {
       id = Integer.parseInt(args[0]);
     } catch (NumberFormatException e) {
@@ -46,11 +47,15 @@ public class ReplaceIfHigher implements Executable {
       return "! Format error: " + e.getMessage();
     }
     Vehicle old = storage.getElement(id);
-    if (old.compareTo(replace) < 0) {
-      storage.updateElement(old.getId(), replace);
-      return "Replaced 1 item";
-    } else {
-      return "Replaced 0 items";
+    try {
+      if (old.compareTo(replace) < 0) {
+        storage.updateElement(old.getId(), replace);
+        return "Replaced 1 item";
+      } else {
+        return "Replaced 0 items";
+      }
+    } catch (SQLException e) {
+      return "! Database error: " + e.getMessage();
     }
   }
 }

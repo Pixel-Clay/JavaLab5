@@ -3,6 +3,7 @@ package clay.vehicle.commands;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
@@ -49,7 +50,11 @@ public class Update implements Executable {
     }
     update.setId(id);
 
-    storage.insert(update);
+    try {
+      storage.insert(update);
+    } catch (SQLException e) {
+      return "! Database error: " + e.getMessage();
+    }
 
     return "Updated id " + id + ": " + update;
   }

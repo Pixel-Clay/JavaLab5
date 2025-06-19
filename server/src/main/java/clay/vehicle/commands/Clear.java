@@ -1,6 +1,7 @@
 package clay.vehicle.commands;
 
 import clay.vehicle.dataStorage.Storage;
+import java.sql.SQLException;
 
 /**
  * Command implementation for clearing the vehicle storage. This command removes all vehicles from
@@ -28,7 +29,11 @@ public class Clear implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    storage.clearCollection();
-    return "Cleared collection";
+    try {
+      storage.clearCollection();
+      return "Cleared collection";
+    } catch (SQLException e) {
+      return "! Database error: " + e.getMessage();
+    }
   }
 }
