@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id SERIAL,
-    login TEXT NOT NULL,
-    pass_hash TEXT NOT NULL
+    login TEXT NOT NULL UNIQUE,
+    pass_hash TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE vehicles (
