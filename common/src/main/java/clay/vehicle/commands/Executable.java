@@ -5,6 +5,7 @@ package clay.vehicle.commands;
  * must implement this interface to be recognized and executed by the command processor.
  */
 public interface Executable {
+
   /**
    * Executes the command with the given arguments.
    *

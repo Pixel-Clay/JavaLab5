@@ -42,6 +42,12 @@ public class NetworkMessageDeserializer {
       } else {
         builder.setArgs(null);
       }
+      if (node.hasNonNull("login")) {
+        builder.setLogin(node.get("login").asText());
+      }
+      if (node.hasNonNull("password")) {
+        builder.setPassword(node.get("password").asText());
+      }
       return builder.build();
     } catch (Exception e) {
       throw new RuntimeException("Failed to deserialize NetworkMessage", e);
@@ -73,6 +79,12 @@ public class NetworkMessageDeserializer {
         }
         builder.setArgs(args);
       } else builder.setArgs(null);
+      if (node.hasNonNull("login")) {
+        builder.setLogin(node.get("login").asText());
+      }
+      if (node.hasNonNull("password")) {
+        builder.setPassword(node.get("password").asText());
+      }
       return builder.build();
     } catch (Exception e) {
       throw new RuntimeException("Failed to deserialize NetworkMessage", e);

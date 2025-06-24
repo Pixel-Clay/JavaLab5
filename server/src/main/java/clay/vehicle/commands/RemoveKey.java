@@ -33,6 +33,10 @@ public class RemoveKey implements Executable {
     if (args.length == 0) return "! Not enough arguments";
     else key = Integer.parseInt(args[0]);
 
+    if (storage.getElement(key).getUserId() != Integer.parseInt(args[args.length - 1])) {
+      return "! Permission error";
+    }
+
     try {
       Vehicle res = storage.removeKey(key);
       if (res == null) return "! Specified key not found";

@@ -44,6 +44,7 @@ public class RemoveAnyByEnginePower implements Executable {
     Optional<Integer> lowerIds =
         this.storage.getCollection().values().stream()
             .filter(vehicle -> vehicle.getEnginePower().equals(enginePower))
+            .filter(vehicle -> vehicle.getUserId().equals(Integer.parseInt(args[args.length - 1])))
             .map(Vehicle::getId)
             .findAny();
 

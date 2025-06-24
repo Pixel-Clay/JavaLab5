@@ -33,7 +33,7 @@ public class Insert implements Executable {
   public String execute(String[] args) {
     Vehicle v;
     try {
-      v = MiscUtils.getaVehicleFromArgs(args, storage);
+      v = MiscUtils.getaVehicleFromArgs(args, storage, Integer.parseInt(args[args.length - 1]));
     } catch (ValidationException e) {
       return "! Format error: " + e.getMessage();
     }

@@ -40,11 +40,12 @@ public class RemoveLower implements Executable {
     } catch (ValidationException e) {
       return "! Format error: " + e.getMessage();
     }
-    Integer counter = 0;
+    int counter = 0;
 
     Set<Integer> lowerIds =
         this.storage.getCollection().values().stream()
-            .filter(route -> route.compareTo(example) < 0)
+            .filter(vehicle -> vehicle.getUserId().equals(Integer.parseInt(args[args.length - 1])))
+            .filter(vehicle -> vehicle.compareTo(example) < 0)
             .map(Vehicle::getId)
             .collect(Collectors.toSet());
 

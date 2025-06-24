@@ -25,8 +25,8 @@ public class VehicleStorageSerializer extends JsonSerializer<VehicleStorage> {
   public void serialize(VehicleStorage value, JsonGenerator gen, SerializerProvider serializers)
       throws IOException {
     List<VehicleStorageCsvRow> rows =
-        value.getStorage().entrySet().stream()
-            .map(entry -> new VehicleStorageCsvRow(entry.getValue(), value.getInitDate()))
+        value.getStorage().values().stream()
+            .map(vehicle -> new VehicleStorageCsvRow(vehicle, value.getInitDate()))
             .toList();
 
     serializers.defaultSerializeValue(rows, gen);

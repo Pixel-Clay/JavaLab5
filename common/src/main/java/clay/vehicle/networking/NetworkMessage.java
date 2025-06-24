@@ -3,6 +3,7 @@ package clay.vehicle.networking;
 import java.net.SocketAddress;
 import lombok.Getter;
 
+@SuppressWarnings("unused")
 @Getter
 public class NetworkMessage {
   private SocketAddress address;
@@ -35,6 +36,11 @@ public class NetworkMessage {
 
   public boolean hasPassword() {
     return password != null;
+  }
+
+  public void setAuth(String login, String password) {
+    this.login = login;
+    this.password = password;
   }
 
   private NetworkMessage() {}

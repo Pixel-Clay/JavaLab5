@@ -1,12 +1,14 @@
 package clay.vehicle.commands;
 
 import clay.vehicle.Shell;
+import clay.vehicle.dataStorage.PgStoreManager;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Coordinates;
 import clay.vehicle.vehicles.FuelType;
 import clay.vehicle.vehicles.Vehicle;
 import clay.vehicle.vehicles.VehicleType;
 import jakarta.validation.*;
+import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +24,12 @@ import java.util.stream.Stream;
  */
 public class MiscUtils {
 
+  static PgStoreManager db;
+
+  public static void attachDB(PgStoreManager manager) {
+    db = manager;
+  }
+
   /**
    * Prompts the user for a non-null Double value. Keeps prompting until a valid number is entered.
    *
@@ -30,14 +38,14 @@ public class MiscUtils {
    * @return the entered Double value
    */
   public static Double getaDoubleNotNull(Shell shell, String invitation) {
-    Double x;
+    double x;
     while (true) {
       String inp = shell.getInput("Insert " + invitation);
       try {
         x = Double.parseDouble(inp.replace(",", "."));
         if (Double.isInfinite(x)) {
           System.out.println("! Value can't be infinite");
-        } else if (x.isNaN()) {
+        } else if (Double.isNaN(x)) {
           System.out.println("! Value can't be NaN");
         } else break;
       } catch (NumberFormatException e) {
@@ -57,15 +65,15 @@ public class MiscUtils {
    * @return the entered Float value
    */
   public static Float getaFloatNotNull(Shell shell, String invitation) {
-    Float x;
+    float x;
     while (true) {
       String inp = shell.getInput("Insert " + invitation);
       try {
-        x = Float.valueOf(inp.replace(",", "."));
-        if (x.isInfinite()) {
+        x = Float.parseFloat(inp.replace(",", "."));
+        if (Float.isInfinite(x)) {
           System.out.println("! Value can't be infinite");
           continue;
-        } else if (x.isNaN()) {
+        } else if (Float.isNaN(x)) {
           System.out.println("! Value can't be NaN");
           continue;
         }
@@ -152,7 +160,7 @@ public class MiscUtils {
   public static Vehicle getaVehicleFromArgs(String[] args, VehicleStorage storage)
       throws ValidationException {
 
-    if (args.length != 7)
+    if (args.length < 7)
       throw new ValidationException("Not enough arguments: " + String.join(" ", args));
 
     System.out.println("INS " + String.join(" _ ", args));
@@ -174,13 +182,53 @@ public class MiscUtils {
           new Vehicle(
               storage.getNextId(),
               args[0].substring(1, args[0].length() - 1),
-              new Coordinates(Double.valueOf(args[1]), Double.valueOf(args[2])),
+              new Coordinates(Double.parseDouble(args[1]), Double.parseDouble(args[2])),
               ZonedDateTime.now(),
               Float.valueOf(args[3]),
               Float.valueOf(args[4]),
               vt,
               FuelType.valueOf(args[6]),
               0);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    Set<ConstraintViolation<Vehicle>> violations = validator.validate(v);
+    if (!violations.isEmpty()) throw new ValidationException(violations.toString());
+    else return v;
+  }
+
+  public static Vehicle getaVehicleFromArgs(String[] args, VehicleStorage storage, Integer uid)
+      throws ValidationException {
+
+    if (args.length < 7)
+      throw new ValidationException("Not enough arguments: " + String.join(" ", args));
+
+    System.out.println("INS " + String.join(" _ ", args));
+
+    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    Validator validator = factory.getValidator();
+
+    Vehicle v;
+
+    VehicleType vt;
+    try {
+      vt = VehicleType.valueOf(args[5]);
+    } catch (IllegalArgumentException e) {
+      vt = null;
+    }
+
+    try {
+      v =
+          new Vehicle(
+              storage.getNextId(),
+              args[0].substring(1, args[0].length() - 1),
+              new Coordinates(Double.parseDouble(args[1]), Double.parseDouble(args[2])),
+              ZonedDateTime.now(),
+              Float.valueOf(args[3]),
+              Float.valueOf(args[4]),
+              vt,
+              FuelType.valueOf(args[6]),
+              uid);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -237,10 +285,14 @@ public class MiscUtils {
   }
 
   public static String[] splitQuoted(String s) {
-    List<String> list = new ArrayList();
+    List<String> list = new ArrayList<>();
     Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(s);
     while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
 
     return list.toArray(new String[0]);
+  }
+
+  public static Integer verifyLogin(String login, String password) throws SQLException {
+    return db.verifyLogin(login, password);
   }
 }

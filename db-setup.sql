@@ -20,3 +20,5 @@ CREATE TABLE vehicles (
 CREATE SEQUENCE veh_id
     START 1
     INCREMENT 1;
+
+ALTER SEQUENCE users_id_seq RESTART WITH 1;

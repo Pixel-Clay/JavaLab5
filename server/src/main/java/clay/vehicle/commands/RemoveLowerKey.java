@@ -32,7 +32,7 @@ public class RemoveLowerKey implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    Integer id;
+    int id;
     try {
       id = Integer.parseInt(args[0]);
     } catch (NumberFormatException e) {
@@ -41,12 +41,13 @@ public class RemoveLowerKey implements Executable {
       return "! Not enough arguments";
     }
 
-    Integer counter = 0;
+    int counter = 0;
 
     Set<Integer> lowerIds =
         this.storage.getCollection().values().stream()
-            .filter(vehicle -> vehicle.getId() < id)
+            .filter(vehicle -> vehicle.getUserId().equals(Integer.parseInt(args[args.length - 1])))
             .map(Vehicle::getId)
+            .filter(vehicleId -> vehicleId < id)
             .collect(Collectors.toSet());
 
     try {

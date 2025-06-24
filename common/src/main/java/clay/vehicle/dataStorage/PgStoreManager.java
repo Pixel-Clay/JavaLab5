@@ -179,60 +179,70 @@ public class PgStoreManager {
     logger.info("Reset vehicle ids");
   }
 
-/* users table:
-* id integer not null unique,
-  login text not null unique,
-  pass_hash text not null unique
-*/
-private String hashPassword(String password) throws SQLException {
-    try {
-        java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-1");
-        byte[] hashBytes = md.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        StringBuilder sb = new StringBuilder();
-        for (byte b : hashBytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    } catch (java.security.NoSuchAlgorithmException e) {
-        logger.error("Failed to hash password: " + e.getMessage());
-        throw new SQLException("Failed to hash password", e);
+  public void resetUsers() throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("TRUNCATE TABLE users");
+      stmt.executeUpdate("ALTER SEQUENCE users_id_seq RESTART WITH 1");
+    } catch (SQLException e) {
+      logger.error("Failed to reset users: " + e.getMessage());
+      throw new SQLException("Failed to reset users", e);
     }
-}
 
-public void createUser(String login, String password) throws SQLException {
+    logger.warn("Reset users by admin command!");
+  }
+
+  /* users table:
+  * id integer not null unique,
+    login text not null unique,
+    pass_hash text not null unique
+  */
+  private String hashPassword(String password) throws SQLException {
+    try {
+      java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-512");
+      byte[] hashBytes = md.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      StringBuilder sb = new StringBuilder();
+      for (byte b : hashBytes) {
+        sb.append(String.format("%02x", b));
+      }
+      return sb.toString();
+    } catch (java.security.NoSuchAlgorithmException e) {
+      logger.error("Failed to hash password: " + e.getMessage());
+      throw new SQLException("Failed to hash password", e);
+    }
+  }
+
+  public void createUser(String login, String password) throws SQLException {
     String sql = "INSERT INTO users (login, pass_hash) VALUES (?, ?)";
     String passHash = hashPassword(password);
 
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setString(1, login);
-        ps.setString(2, passHash);
-        ps.executeUpdate();
+      ps.setString(1, login);
+      ps.setString(2, passHash);
+      ps.executeUpdate();
     } catch (SQLException e) {
-        logger.error("Failed to create user: " + e.getMessage());
-        throw new SQLException("Failed to create user", e);
+      logger.error("Failed to create user: " + e.getMessage());
+      throw new SQLException("Failed to create user", e);
     }
-}
+  }
 
-public Integer verifyLogin(String login, String password) throws SQLException {
+  public Integer verifyLogin(String login, String password) throws SQLException {
     String sql = "SELECT id, pass_hash FROM users WHERE login = ?";
     String passHash = hashPassword(password);
 
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setString(1, login);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                String storedHash = rs.getString("pass_hash");
-                if (passHash.equals(storedHash)) {
-                    return rs.getInt("id");
-                }
-            }
-            return null;
+      ps.setString(1, login);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          String storedHash = rs.getString("pass_hash");
+          if (passHash.equals(storedHash)) {
+            return rs.getInt("id");
+          }
         }
+        return null;
+      }
     } catch (SQLException e) {
-        logger.error("Failed to verify login: " + e.getMessage());
-        throw new SQLException("Failed to verify login", e);
+      logger.error("Failed to verify login: " + e.getMessage());
+      throw new SQLException("Failed to verify login", e);
     }
-}
-
-
+  }
 }

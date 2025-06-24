@@ -40,6 +40,7 @@ public class ReplaceIfHigher implements Executable {
     } catch (ArrayIndexOutOfBoundsException e) {
       return "! Not enough arguments";
     }
+
     Vehicle replace;
     try {
       replace = MiscUtils.getaVehicleFromArgs(Arrays.copyOfRange(args, 1, args.length), storage);
@@ -47,6 +48,11 @@ public class ReplaceIfHigher implements Executable {
       return "! Format error: " + e.getMessage();
     }
     Vehicle old = storage.getElement(id);
+
+    if (old.getUserId() != Integer.parseInt(args[args.length - 1])) {
+      return "! Permission error";
+    }
+
     try {
       if (old.compareTo(replace) < 0) {
         storage.updateElement(old.getId(), replace);

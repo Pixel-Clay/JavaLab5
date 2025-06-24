@@ -1,5 +1,6 @@
 package clay.vehicle.commands;
 
+import clay.vehicle.dataStorage.PgStoreManager;
 import clay.vehicle.dataStorage.Storage;
 import java.sql.SQLException;
 
@@ -12,13 +13,16 @@ public class Clear implements Executable {
   /** The storage instance to be cleared */
   Storage storage;
 
+  PgStoreManager manager;
+
   /**
    * Constructs a new Clear command with the specified storage.
    *
    * @param storage the storage to be cleared
    */
-  public Clear(Storage storage) {
+  public Clear(Storage storage, PgStoreManager manager) {
     this.storage = storage;
+    this.manager = manager;
   }
 
   /**
@@ -29,11 +33,24 @@ public class Clear implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    try {
-      storage.clearCollection();
-      return "Cleared collection";
-    } catch (SQLException e) {
-      return "! Database error: " + e.getMessage();
+    if (Integer.parseInt(args[args.length - 1]) != 1) {
+      return "! Permission error";
+    }
+
+    if (args[0].equals("users")) {
+      try {
+        manager.resetUsers();
+        return "Reset user accounts. Now create admin account using login.";
+      } catch (SQLException e) {
+        return "! Database error: " + e.getMessage();
+      }
+    } else {
+      try {
+        storage.clearCollection();
+        return "Cleared collection";
+      } catch (SQLException e) {
+        return "! Database error: " + e.getMessage();
+      }
     }
   }
 }

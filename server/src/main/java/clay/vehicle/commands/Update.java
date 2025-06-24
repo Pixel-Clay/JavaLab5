@@ -33,13 +33,19 @@ public class Update implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    Integer id;
+    int id;
     try {
       id = Integer.parseInt(args[0]);
     } catch (NumberFormatException e) {
       return "! id is not valid";
     } catch (ArrayIndexOutOfBoundsException e) {
       return "! Not enough arguments";
+    }
+
+    Vehicle old = storage.getElement(id);
+
+    if (old.getUserId() != Integer.parseInt(args[args.length - 1])) {
+      return "! Permission error";
     }
 
     Vehicle update;
