@@ -119,6 +119,8 @@ public class Main {
               logger.warn("Could not disconnect from db: " + e.getMessage());
             }
             logger.info("Stopping server...");
+            networkingManager.stop();
+            logger.info("Closing process...");
             System.exit(0); // Exit the program
           };
 

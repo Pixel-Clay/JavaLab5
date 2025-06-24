@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -43,9 +44,16 @@ public class ServerNetworkingManager {
 
   public void run() throws IOException {
     logger.info("Server running on port " + String.valueOf(getRunningPort()));
+    Set<SelectionKey> selectedKeys;
     while (running) {
       selector.select();
-      Set<SelectionKey> selectedKeys = selector.selectedKeys();
+
+      try {
+        selectedKeys = selector.selectedKeys();
+      } catch (ClosedSelectorException e) {
+        logger.warn("Socket is closed");
+        continue;
+      }
 
       for (var iter = selectedKeys.iterator(); iter.hasNext(); ) {
         SelectionKey key = iter.next();
