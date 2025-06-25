@@ -34,17 +34,17 @@ public class PgStoreManager {
 
   private Connection connection;
 
-  public void connect(String jdbcUrl, Properties properties) throws SQLException {
+  public synchronized void connect(String jdbcUrl, Properties properties) throws SQLException {
     connection = DriverManager.getConnection(jdbcUrl, properties);
     logger.info("Connected to " + jdbcUrl);
   }
 
-  public void disconnect() throws SQLException {
+  public synchronized void disconnect() throws SQLException {
     connection.close();
     logger.info("Disconnected from db");
   }
 
-  public void syncFromDB(VehicleStorage storage) throws SQLException {
+  public synchronized void syncFromDB(VehicleStorage storage) throws SQLException {
     Statement statement = connection.createStatement();
     ResultSet dbVehicles = statement.executeQuery("select * from vehicles");
 
@@ -93,7 +93,7 @@ public class PgStoreManager {
     statement.close();
   }
 
-  public void insert(Vehicle vehicle) throws SQLException {
+  public synchronized void insert(Vehicle vehicle) throws SQLException {
     Statement statement = connection.createStatement();
     PreparedStatement ps =
         connection.prepareStatement("insert into vehicles values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -116,7 +116,7 @@ public class PgStoreManager {
     statement.close();
   }
 
-  public int nextVehicleId() throws SQLException {
+  public synchronized int nextVehicleId() throws SQLException {
     String sql = "SELECT nextval('veh_id')";
     try (Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(sql)) {
@@ -128,7 +128,7 @@ public class PgStoreManager {
     }
   }
 
-  public void removeKey(int id) throws SQLException {
+  public synchronized void removeKey(int id) throws SQLException {
     try (PreparedStatement ps = connection.prepareStatement("DELETE FROM vehicles WHERE id = ?")) {
       ps.setInt(1, id);
       ps.executeUpdate();
@@ -137,7 +137,7 @@ public class PgStoreManager {
     }
   }
 
-  public void update(int id, Vehicle vehicle) throws SQLException {
+  public synchronized void update(int id, Vehicle vehicle) throws SQLException {
     try (PreparedStatement ps =
         connection.prepareStatement(
             "UPDATE vehicles SET name = ?, x = ?, y = ?, creation_date = ?, engine_power = ?, distance_travelled = ?, type = ?, fuel_type = ?, user_id = ? WHERE id = ?")) {
@@ -157,7 +157,7 @@ public class PgStoreManager {
     }
   }
 
-  public void truncateVehicles() throws SQLException {
+  public synchronized void truncateVehicles() throws SQLException {
     try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("TRUNCATE TABLE vehicles");
     } catch (SQLException e) {
@@ -168,7 +168,7 @@ public class PgStoreManager {
     logger.info("Truncated table vehicles");
   }
 
-  public void resetVehicleIDs() throws SQLException {
+  public synchronized void resetVehicleIDs() throws SQLException {
     try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("ALTER SEQUENCE veh_id RESTART WITH 1");
     } catch (SQLException e) {
@@ -179,7 +179,7 @@ public class PgStoreManager {
     logger.info("Reset vehicle ids");
   }
 
-  public void resetUsers() throws SQLException {
+  public synchronized void resetUsers() throws SQLException {
     try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("TRUNCATE TABLE users");
       stmt.executeUpdate("ALTER SEQUENCE users_id_seq RESTART WITH 1");
@@ -196,7 +196,7 @@ public class PgStoreManager {
     login text not null unique,
     pass_hash text not null unique
   */
-  private String hashPassword(String password) throws SQLException {
+  private synchronized String hashPassword(String password) throws SQLException {
     try {
       java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-512");
       byte[] hashBytes = md.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -211,7 +211,7 @@ public class PgStoreManager {
     }
   }
 
-  public void createUser(String login, String password) throws SQLException {
+  public synchronized void createUser(String login, String password) throws SQLException {
     String sql = "INSERT INTO users (login, pass_hash) VALUES (?, ?)";
     String passHash = hashPassword(password);
 
@@ -225,7 +225,7 @@ public class PgStoreManager {
     }
   }
 
-  public Integer verifyLogin(String login, String password) throws SQLException {
+  public synchronized Integer verifyLogin(String login, String password) throws SQLException {
     String sql = "SELECT id, pass_hash FROM users WHERE login = ?";
     String passHash = hashPassword(password);
 

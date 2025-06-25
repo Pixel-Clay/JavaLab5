@@ -21,7 +21,7 @@ public class CommandProcessor {
    *
    * @param instruction The command instruction to be processed
    */
-  public void addInstruction(String instruction) {
+  public synchronized void addInstruction(String instruction) {
     instructions.add(instruction);
   }
 
@@ -31,16 +31,16 @@ public class CommandProcessor {
    * @param cmd The executable command to attach
    * @param name The name/keyword that will be used to invoke this command
    */
-  public void attachCommand(Executable cmd, String name) {
+  public synchronized void attachCommand(Executable cmd, String name) {
     commands.put(name, cmd);
   }
 
   /** Clears the command queue */
-  public void clearQueue() {
+  public synchronized void clearQueue() {
     instructions.clear();
   }
 
-  public String runReturnable() throws InvalidInstructionException {
+  public synchronized String runReturnable() throws InvalidInstructionException {
     String instruction;
     StringBuilder builder = new StringBuilder();
     for (int idx = 0; idx < instructions.toArray().length; idx++) {
