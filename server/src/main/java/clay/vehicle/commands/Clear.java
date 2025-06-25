@@ -40,7 +40,7 @@ public class Clear implements Executable {
     if (args[0].equals("users")) {
       try {
         manager.resetUsers();
-        return "Reset user accounts. Now create admin account using login.";
+        return "Reset user accounts. Now create admin account using register.";
       } catch (SQLException e) {
         return "! Database error: " + e.getMessage();
       }
