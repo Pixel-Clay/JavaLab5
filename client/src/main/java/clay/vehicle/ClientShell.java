@@ -3,7 +3,9 @@ package clay.vehicle;
 import clay.vehicle.commands.Executable;
 import clay.vehicle.commands.RecursionException;
 import clay.vehicle.networking.ClientNetworkingManager;
+import clay.vehicle.networking.NetworkMessage;
 import clay.vehicle.networking.NetworkMessageDeserializer;
+import clay.vehicle.networking.NetworkMessageSerializer;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
@@ -20,12 +22,15 @@ public class ClientShell implements Shell {
 
   @Getter CommandProcessor processor;
 
+  private String login = null;
+  private String password = null;
+
   private ClientNetworkingManager nm;
 
   private Boolean exitFlag = false;
   private Boolean recordedInputFlag = false;
 
-  private Queue<String> recordedInputBuffer = new LinkedList<>();
+  private final Queue<String> recordedInputBuffer = new LinkedList<>();
 
   public ClientShell(CommandProcessor commandProcessor) {
     this.processor = commandProcessor;
@@ -76,6 +81,7 @@ public class ClientShell implements Shell {
    * @param invitation The prompt text to display to the user
    * @return The user's input line, or null if empty line was entered
    */
+  @SuppressWarnings("LoopStatementThatDoesntLoop")
   @Override
   public String getInput(String invitation) {
     if (recordedInputFlag && !recordedInputBuffer.isEmpty()) {
@@ -101,6 +107,11 @@ public class ClientShell implements Shell {
     }
   }
 
+  public void setLogin(String login, String password) {
+    this.login = login;
+    this.password = password;
+  }
+
   /**
    * Runs the interactive shell loop. Continuously prompts for user input, processes commands, and
    * handles any invalid instructions.
@@ -112,6 +123,7 @@ public class ClientShell implements Shell {
     String ret;
 
     String line;
+    System.out.println("You are currently not signed in. Use 'login' or 'register'");
     while (!exitFlag) {
       line = getInput("> ");
       if (line == null) continue;
@@ -121,6 +133,11 @@ public class ClientShell implements Shell {
         for (String cmd : ret.split("\n")) {
           if (cmd.charAt(0) == '!') System.out.println(cmd);
           else {
+            if (login != null) {
+              NetworkMessage packet = NetworkMessageDeserializer.deserialize(cmd);
+              packet.setAuth(login, password);
+              cmd = NetworkMessageSerializer.serialize(packet);
+            }
             nm.transmit(cmd);
             try {
               System.out.println(NetworkMessageDeserializer.deserialize(nm.receive()).getMessage());

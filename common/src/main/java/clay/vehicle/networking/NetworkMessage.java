@@ -3,6 +3,7 @@ package clay.vehicle.networking;
 import java.net.SocketAddress;
 import lombok.Getter;
 
+@SuppressWarnings("unused")
 @Getter
 public class NetworkMessage {
   private SocketAddress address;
@@ -10,6 +11,8 @@ public class NetworkMessage {
   private String command;
   private String[] args;
   private String message;
+  private String login;
+  private String password;
 
   public boolean hasMessage() {
     return message != null;
@@ -25,6 +28,19 @@ public class NetworkMessage {
 
   public boolean hasCommand() {
     return command != null;
+  }
+
+  public boolean hasLogin() {
+    return login != null;
+  }
+
+  public boolean hasPassword() {
+    return password != null;
+  }
+
+  public void setAuth(String login, String password) {
+    this.login = login;
+    this.password = password;
   }
 
   private NetworkMessage() {}
@@ -58,6 +74,16 @@ public class NetworkMessage {
 
     public Builder setCommand(String command) {
       NetworkMessage.this.command = command;
+      return this;
+    }
+
+    public Builder setLogin(String login) {
+      NetworkMessage.this.login = login;
+      return this;
+    }
+
+    public Builder setPassword(String password) {
+      NetworkMessage.this.password = password;
       return this;
     }
 

@@ -25,8 +25,10 @@ public class Main {
    * @param args Command line arguments (not used)
    */
   public static void main(String[] args) {
+    System.setProperty("log4j2.StatusLogger.level", "OFF");
+
     ClientNetworkingManager networkingManager = null;
-    String hostname = null;
+    String hostname;
     Integer port = null;
 
     if (args.length < 2) {
@@ -43,7 +45,7 @@ public class Main {
       System.exit(-1);
     }
 
-    if (port < 0 && port > 65535) {
+    if (port < 0 || port > 65535) {
       System.out.println("! Invalid port");
       System.exit(-1);
     }
@@ -65,6 +67,9 @@ public class Main {
     shell.attachCommand(new RemoveAnyByEnginePower(), "remove_any_by_engine_power");
     shell.attachCommand(new PrintAscending(), "print_ascending");
     shell.attachCommand(new GroupCountungByCoordinates(), "group_counting_by_coordinates");
+    shell.attachCommand(new Login(shell), "login");
+    shell.attachCommand(new Register(shell), "register");
+
     try {
       networkingManager = new ClientNetworkingManager(hostname, port);
       networkingManager.init();

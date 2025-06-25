@@ -3,6 +3,7 @@ package clay.vehicle.commands;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
+import java.sql.SQLException;
 
 /**
  * Command implementation for inserting a new vehicle into the storage. This command prompts the
@@ -32,12 +33,16 @@ public class Insert implements Executable {
   public String execute(String[] args) {
     Vehicle v;
     try {
-      v = MiscUtils.getaVehicleFromArgs(args, storage);
+      v = MiscUtils.getaVehicleFromArgs(args, storage, Integer.parseInt(args[args.length - 1]));
     } catch (ValidationException e) {
       return "! Format error: " + e.getMessage();
     }
 
-    storage.insert(v);
-    return "Inserted new " + v;
+    try {
+      storage.insert(v);
+      return "Inserted new " + v;
+    } catch (SQLException e) {
+      return "! Database error: " + e;
+    }
   }
 }

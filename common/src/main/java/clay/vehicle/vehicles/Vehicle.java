@@ -43,6 +43,9 @@ public class Vehicle implements Comparable<Vehicle> {
   /** Type of fuel used by the vehicle. Cannot be null. */
   @NotNull private FuelType fuelType;
 
+  /** User ID of the vehicle. Cannot be null. */
+  @NotNull private int userId;
+
   /**
    * Constructs a new Vehicle with the specified attributes.
    *
@@ -54,6 +57,7 @@ public class Vehicle implements Comparable<Vehicle> {
    * @param distanceTravelled the total distance travelled by the vehicle
    * @param type the type of the vehicle
    * @param fuelType the type of fuel used by the vehicle
+   * @param userId the user ID of the vehicle
    */
   public Vehicle(
       int id,
@@ -63,7 +67,8 @@ public class Vehicle implements Comparable<Vehicle> {
       Float enginePower,
       Float distanceTravelled,
       VehicleType type,
-      FuelType fuelType) {
+      FuelType fuelType,
+      int userId) {
     this.id = id;
     this.name = name;
     this.coordinates = coordinates;
@@ -72,6 +77,7 @@ public class Vehicle implements Comparable<Vehicle> {
     this.distanceTravelled = distanceTravelled;
     this.type = type;
     this.fuelType = fuelType;
+    this.userId = userId;
   }
 
   /**

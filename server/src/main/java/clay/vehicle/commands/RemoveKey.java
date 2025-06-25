@@ -2,6 +2,7 @@ package clay.vehicle.commands;
 
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
+import java.sql.SQLException;
 
 /**
  * Command implementation for removing a vehicle by its key. This command removes a vehicle from the
@@ -28,12 +29,20 @@ public class RemoveKey implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    Integer key;
+    int key;
     if (args.length == 0) return "! Not enough arguments";
     else key = Integer.parseInt(args[0]);
 
-    Vehicle res = storage.removeKey(key);
-    if (res == null) return "! Specified key not found";
-    else return "Removed key " + key;
+    if (storage.getElement(key).getUserId() != Integer.parseInt(args[args.length - 1])) {
+      return "! Permission error";
+    }
+
+    try {
+      Vehicle res = storage.removeKey(key);
+      if (res == null) return "! Specified key not found";
+      else return "Removed key " + key;
+    } catch (SQLException e) {
+      return "! Database error: " + e.getMessage();
+    }
   }
 }

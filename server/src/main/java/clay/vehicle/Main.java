@@ -1,16 +1,16 @@
 package clay.vehicle;
 
 import clay.vehicle.commands.*;
-import clay.vehicle.dataStorage.CsvReader;
-import clay.vehicle.dataStorage.EnvPathRetriever;
-import clay.vehicle.dataStorage.NoEnvVarFoundException;
-import clay.vehicle.dataStorage.VehicleStorage;
+import clay.vehicle.dataStorage.*;
 import clay.vehicle.networking.OnReadExecutionCallback;
 import clay.vehicle.networking.ServerNetworkingManager;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import sun.misc.Signal;
@@ -52,69 +52,99 @@ public class Main {
       logger.error("Env var not found, set one at $CLAY_VEHICLE_DATA_PATH");
       System.exit(-1);
     }
+
+    Properties info = new Properties();
     try {
-      newStorage = CsvReader.readVehicleStorageFromCsv(outputPath);
+      info.load(new FileInputStream(outputPath.toString()));
     } catch (FileNotFoundException e) {
-      logger.error("Database not found. Exiting...");
+      logger.error("Database config not found. Exiting...");
       System.exit(-2);
     } catch (IOException e) {
-      logger.error("Critical IO exception: " + e.getMessage() + ". Exiting...");
+      logger.error("Could not load database config: " + e.getMessage() + ". Exiting...");
       System.exit(-3);
     }
+
+    String jdbcUrl = info.getProperty("jdbcURL");
+    if (jdbcUrl == null) {
+      logger.error("Database URL not specified. Exiting...");
+      System.exit(-4);
+    }
+
+    DbStoreManager db = new PgStoreManager();
+    try {
+      db.connect(jdbcUrl, info);
+      newStorage = new VehicleStorage(db);
+    } catch (SQLException e) {
+      logger.error("Could not connect to database: " + e.getMessage() + ". Exiting...");
+      System.exit(-5);
+    }
+    try {
+      db.syncFromDB(newStorage);
+    } catch (SQLException e) {
+      logger.error("Failed to sync from db: " + e.getMessage());
+      System.exit(-69);
+    }
+
     logger.info(
         "Successfully loaded " + newStorage.getStorage().size() + " vehicles after validation");
 
-    Save saver = new Save(newStorage, outputPath);
-
+    MiscUtils.attachDB(db);
     OnReadExecutionCallback executor = new OnReadExecutionCallback();
 
-    executor.attachCommand(new Info(newStorage), "info");
-    executor.attachCommand(new Show(newStorage), "show");
-    executor.attachCommand(new Help(), "help");
-    executor.attachCommand(new RemoveKey(newStorage), "remove_key");
-    executor.attachCommand(new Insert(newStorage), "insert");
-    executor.attachCommand(new Update(newStorage), "update");
-    executor.attachCommand(new Clear(newStorage), "clear");
-    executor.attachCommand(new RemoveLower(newStorage), "remove_lower");
-    executor.attachCommand(new ReplaceIfHigher(newStorage), "replace_if_greater");
-    executor.attachCommand(new RemoveLowerKey(newStorage), "remove_lower_key");
-    executor.attachCommand(new RemoveAnyByEnginePower(newStorage), "remove_any_by_engine_power");
-    executor.attachCommand(new PrintAscending(newStorage), "print_ascending");
+    executor.attachCommand(new Info(newStorage), "info", true);
+    executor.attachCommand(new Show(newStorage), "show", true);
+    executor.attachCommand(new Help(), "help", true);
+    executor.attachCommand(new RemoveKey(newStorage), "remove_key", true);
+    executor.attachCommand(new Insert(newStorage), "insert", true);
+    executor.attachCommand(new Update(newStorage), "update", true);
+    executor.attachCommand(new Clear(newStorage, db), "clear", true);
+    executor.attachCommand(new RemoveLower(newStorage), "remove_lower", true);
+    executor.attachCommand(new ReplaceIfHigher(newStorage), "replace_if_greater", true);
+    executor.attachCommand(new RemoveLowerKey(newStorage), "remove_lower_key", true);
     executor.attachCommand(
-        new GroupCountungByCoordinates(newStorage), "group_counting_by_coordinates");
+        new RemoveAnyByEnginePower(newStorage), "remove_any_by_engine_power", true);
+    executor.attachCommand(new PrintAscending(newStorage), "print_ascending", true);
+    executor.attachCommand(
+        new GroupCountungByCoordinates(newStorage), "group_counting_by_coordinates", true);
+    executor.attachCommand(new Register(db), "register", false);
 
-    SignalHandler handler =
-        signal -> {
-          logger.info("Ctrl+C detected. Saving and shutting down...");
-          saver.execute(new String[] {});
-          System.exit(0); // Exit the program
-        };
-
-    // Register the handler for SIGINT
-    Signal.handle(new Signal("INT"), handler);
-
-    ServerNetworkingManager networkingManager = null;
+    final ServerNetworkingManager networkingManager;
 
     logger.info("Starting server...");
 
     try {
       networkingManager = new ServerNetworkingManager(Integer.parseInt(args[0]));
       networkingManager.init();
+      networkingManager.setReadCallback(executor);
+
+      SignalHandler handler =
+          signal -> {
+            logger.info("Ctrl+C detected.");
+            logger.info("Stopping server...");
+            networkingManager.stop();
+
+            try {
+              db.disconnect();
+            } catch (SQLException e) {
+              logger.warn("Could not disconnect from db: " + e.getMessage());
+            }
+
+            logger.info("Closing process...");
+            System.exit(0); // Exit the program
+          };
+
+      // Register the handler for SIGINT
+      Signal.handle(new Signal("INT"), handler);
+
+      networkingManager.run();
+
     } catch (BindException e) {
       logger.error("Specified port in use, try another one. Exiting...");
-      System.exit(-5);
+      System.exit(-6);
     } catch (IOException e) {
       logger.error("Critical IO exception: " + e);
       logger.error("Exiting...");
-      System.exit(-6);
-    }
-
-    networkingManager.setReadCallback(executor);
-
-    try {
-      networkingManager.run();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      System.exit(-7);
     }
   }
 }

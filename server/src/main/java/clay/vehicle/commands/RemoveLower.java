@@ -3,6 +3,7 @@ package clay.vehicle.commands;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
+import java.sql.SQLException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,17 +40,22 @@ public class RemoveLower implements Executable {
     } catch (ValidationException e) {
       return "! Format error: " + e.getMessage();
     }
-    Integer counter = 0;
+    int counter = 0;
 
     Set<Integer> lowerIds =
         this.storage.getCollection().values().stream()
-            .filter(route -> route.compareTo(example) < 0)
+            .filter(vehicle -> vehicle.getUserId() == Integer.parseInt(args[args.length - 1]))
+            .filter(vehicle -> vehicle.compareTo(example) < 0)
             .map(Vehicle::getId)
             .collect(Collectors.toSet());
 
-    for (Integer i : lowerIds) {
-      storage.removeKey(i);
-      counter++;
+    try {
+      for (Integer i : lowerIds) {
+        storage.removeKey(i);
+        counter++;
+      }
+    } catch (SQLException e) {
+      return "! Database error: " + e.getMessage();
     }
 
     return "Removed " + counter + " items";

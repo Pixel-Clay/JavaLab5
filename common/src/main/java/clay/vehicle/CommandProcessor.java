@@ -12,7 +12,7 @@ import lombok.Setter;
  */
 public class CommandProcessor {
 
-  private List<String> instructions = new ArrayList<>();
+  private final List<String> instructions = new ArrayList<>();
 
   @Getter @Setter private Map<String, Executable> commands = new HashMap<>();
 
@@ -21,7 +21,7 @@ public class CommandProcessor {
    *
    * @param instruction The command instruction to be processed
    */
-  public void addInstruction(String instruction) {
+  public synchronized void addInstruction(String instruction) {
     instructions.add(instruction);
   }
 
@@ -31,52 +31,25 @@ public class CommandProcessor {
    * @param cmd The executable command to attach
    * @param name The name/keyword that will be used to invoke this command
    */
-  public void attachCommand(Executable cmd, String name) {
+  public synchronized void attachCommand(Executable cmd, String name) {
     commands.put(name, cmd);
   }
 
-  /** Debug: Prints all queued instructions. */
-  public void printInstructions() {
-    System.out.println(instructions.toString());
-  }
-
   /** Clears the command queue */
-  public void clearQueue() {
+  public synchronized void clearQueue() {
     instructions.clear();
   }
 
-  /**
-   * Processes and executes all queued instructions. Each instruction is split into a command name
-   * and its arguments. The command is looked up and executed with the provided arguments.
-   *
-   * @throws InvalidInstructionException if an unknown command is encountered
-   */
-  public void run() throws InvalidInstructionException {
-    String instruction;
-    for (Integer idx = 0; idx < instructions.toArray().length; idx++) {
-      instruction = instructions.get(idx);
-      String[] splitInstruction = instruction.split("\\s+");
-      Executable curCommand = commands.get(splitInstruction[0]);
-      if (curCommand == null) {
-        instructions.clear();
-        throw new InvalidInstructionException(String.valueOf(idx + 1) + ": " + instruction);
-      } else
-        System.out.println(
-            curCommand.execute(Arrays.copyOfRange(splitInstruction, 1, splitInstruction.length)));
-    }
-    instructions.clear();
-  }
-
-  public String runReturnable() throws InvalidInstructionException {
+  public synchronized String runReturnable() throws InvalidInstructionException {
     String instruction;
     StringBuilder builder = new StringBuilder();
-    for (Integer idx = 0; idx < instructions.toArray().length; idx++) {
+    for (int idx = 0; idx < instructions.toArray().length; idx++) {
       instruction = instructions.get(idx);
       String[] splitInstruction = MiscUtils.splitQuoted(instruction);
       Executable curCommand = commands.get(splitInstruction[0]);
       if (curCommand == null) {
         instructions.clear();
-        throw new InvalidInstructionException(String.valueOf(idx + 1) + ": " + instruction);
+        throw new InvalidInstructionException(idx + 1 + ": " + instruction);
       } else
         builder.append(
             curCommand.execute(Arrays.copyOfRange(splitInstruction, 1, splitInstruction.length)));

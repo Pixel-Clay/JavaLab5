@@ -9,6 +9,10 @@ public class Clear implements Executable {
   @Override
   public String execute(String[] args) {
     return NetworkMessageSerializer.serialize(
-        NetworkMessage.newBuilder().setType(MessageType.COMMAND).setCommand("clear").build());
+        NetworkMessage.newBuilder()
+            .setType(MessageType.COMMAND)
+            .setCommand("clear")
+            .setArgs(args)
+            .build());
   }
 }

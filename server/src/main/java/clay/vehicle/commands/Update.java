@@ -3,6 +3,7 @@ package clay.vehicle.commands;
 import clay.vehicle.dataStorage.VehicleStorage;
 import clay.vehicle.vehicles.Vehicle;
 import jakarta.validation.ValidationException;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
@@ -32,13 +33,19 @@ public class Update implements Executable {
    */
   @Override
   public String execute(String[] args) {
-    Integer id;
+    int id;
     try {
       id = Integer.parseInt(args[0]);
     } catch (NumberFormatException e) {
       return "! id is not valid";
     } catch (ArrayIndexOutOfBoundsException e) {
       return "! Not enough arguments";
+    }
+
+    Vehicle old = storage.getElement(id);
+
+    if (old.getUserId() != Integer.parseInt(args[args.length - 1])) {
+      return "! Permission error";
     }
 
     Vehicle update;
@@ -49,7 +56,11 @@ public class Update implements Executable {
     }
     update.setId(id);
 
-    storage.insert(update);
+    try {
+      storage.insert(update);
+    } catch (SQLException e) {
+      return "! Database error: " + e.getMessage();
+    }
 
     return "Updated id " + id + ": " + update;
   }

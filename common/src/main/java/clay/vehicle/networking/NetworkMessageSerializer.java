@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 public class NetworkMessageSerializer {
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
+  @SuppressWarnings("PatternVariableCanBeUsed")
   public static String serialize(NetworkMessage message) {
     try {
       ObjectNode node = objectMapper.createObjectNode();
@@ -30,6 +31,12 @@ public class NetworkMessageSerializer {
           arrayNode.add(arg);
         }
         node.set("args", arrayNode);
+      }
+      if (message.getLogin() != null) {
+        node.put("login", message.getLogin());
+      }
+      if (message.getPassword() != null) {
+        node.put("password", message.getPassword());
       }
       return objectMapper.writeValueAsString(node);
     } catch (Exception e) {
