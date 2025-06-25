@@ -163,8 +163,6 @@ public class MiscUtils {
     if (args.length < 7)
       throw new ValidationException("Not enough arguments: " + String.join(" ", args));
 
-    System.out.println("INS " + String.join(" _ ", args));
-
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     Validator validator = factory.getValidator();
 
@@ -202,8 +200,6 @@ public class MiscUtils {
 
     if (args.length < 7)
       throw new ValidationException("Not enough arguments: " + String.join(" ", args));
-
-    System.out.println("INS " + String.join(" _ ", args));
 
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     Validator validator = factory.getValidator();
