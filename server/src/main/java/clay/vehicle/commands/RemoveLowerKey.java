@@ -45,7 +45,7 @@ public class RemoveLowerKey implements Executable {
 
     Set<Integer> lowerIds =
         this.storage.getCollection().values().stream()
-            .filter(vehicle -> vehicle.getUserId().equals(Integer.parseInt(args[args.length - 1])))
+            .filter(vehicle -> vehicle.getUserId() == Integer.parseInt(args[args.length - 1]))
             .map(Vehicle::getId)
             .filter(vehicleId -> vehicleId < id)
             .collect(Collectors.toSet());

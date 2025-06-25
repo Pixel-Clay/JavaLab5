@@ -1,8 +1,8 @@
 package clay.vehicle.commands;
 
 import clay.vehicle.Shell;
-import clay.vehicle.dataStorage.PgStoreManager;
-import clay.vehicle.dataStorage.VehicleStorage;
+import clay.vehicle.dataStorage.DbStoreManager;
+import clay.vehicle.dataStorage.Storage;
 import clay.vehicle.vehicles.Coordinates;
 import clay.vehicle.vehicles.FuelType;
 import clay.vehicle.vehicles.Vehicle;
@@ -24,9 +24,9 @@ import java.util.stream.Stream;
  */
 public class MiscUtils {
 
-  static PgStoreManager db;
+  static DbStoreManager db;
 
-  public static void attachDB(PgStoreManager manager) {
+  public static void attachDB(DbStoreManager manager) {
     db = manager;
   }
 
@@ -157,7 +157,7 @@ public class MiscUtils {
     return inp;
   }
 
-  public static Vehicle getaVehicleFromArgs(String[] args, VehicleStorage storage)
+  public static Vehicle getaVehicleFromArgs(String[] args, Storage storage)
       throws ValidationException {
 
     if (args.length < 7)
@@ -195,7 +195,7 @@ public class MiscUtils {
     else return v;
   }
 
-  public static Vehicle getaVehicleFromArgs(String[] args, VehicleStorage storage, Integer uid)
+  public static Vehicle getaVehicleFromArgs(String[] args, Storage storage, Integer uid)
       throws ValidationException {
 
     if (args.length < 7)

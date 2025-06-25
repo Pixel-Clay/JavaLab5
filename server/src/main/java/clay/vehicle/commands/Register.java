@@ -1,6 +1,6 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.dataStorage.PgStoreManager;
+import clay.vehicle.dataStorage.DbStoreManager;
 import java.sql.SQLException;
 
 /**
@@ -10,10 +10,10 @@ import java.sql.SQLException;
  */
 public class Register implements Executable {
   /** The storage instance where vehicles are stored */
-  PgStoreManager pg;
+  DbStoreManager pg;
 
   /** Constructs a new RemoveLower command with the specified storage. */
-  public Register(PgStoreManager pg) {
+  public Register(DbStoreManager pg) {
     this.pg = pg;
   }
 

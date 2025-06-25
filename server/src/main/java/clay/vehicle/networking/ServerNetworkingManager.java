@@ -22,7 +22,8 @@ public class ServerNetworkingManager {
   private boolean running;
   private final int port;
   private static final Logger logger = LogManager.getLogger(ServerNetworkingManager.class);
-  private final ForkJoinPool pool = ForkJoinPool.commonPool();
+  private final ForkJoinPool readPool = ForkJoinPool.commonPool();
+  private final ForkJoinPool writePool = ForkJoinPool.commonPool();
 
   @Setter private ServerProcessingCallback readCallback;
 
@@ -71,9 +72,8 @@ public class ServerNetworkingManager {
   }
 
   private void handleRead(SelectionKey key) throws IOException {
-    var sc = (DatagramChannel) key.channel();
-
     receiveBuffer.clear();
+    DatagramChannel sc = (DatagramChannel) key.channel();
     SocketAddress clientAddress = sc.receive(receiveBuffer);
 
     if (clientAddress != null) {
@@ -85,7 +85,7 @@ public class ServerNetworkingManager {
       logger.info("Received " + receivedLength + " bytes from " + clientAddress);
 
       // Offload deserialization and processing to ForkJoinPool
-      pool.execute(
+      readPool.execute(
           () -> {
             try {
               String receivedMessage = new String(rawBytes);
@@ -109,9 +109,11 @@ public class ServerNetworkingManager {
   }
 
   private void handleWrite(SelectionKey key) {
-    var dc = (DatagramChannel) key.channel();
+    SocketAddress address;
     NetworkMessage message = (NetworkMessage) key.attachment();
-    SocketAddress address = message.hasAddress() ? message.getAddress() : null;
+
+    DatagramChannel dc = (DatagramChannel) key.channel();
+    address = message.hasAddress() ? message.getAddress() : null;
 
     // Remove OP_WRITE immediately to prevent duplicate tasks
     synchronized (key) {
@@ -119,7 +121,7 @@ public class ServerNetworkingManager {
     }
 
     // Offload serialization and sending to ForkJoinPool
-    pool.execute(
+    writePool.execute(
         () -> {
           try {
             ByteBuffer localSendBuffer = ByteBuffer.allocate(65507);
@@ -146,6 +148,8 @@ public class ServerNetworkingManager {
   public void stop() {
     running = false;
     try {
+      readPool.shutdown();
+      writePool.shutdown();
       selector.close();
       channel.close();
     } catch (IOException e) {

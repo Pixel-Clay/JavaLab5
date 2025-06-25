@@ -1,6 +1,6 @@
 package clay.vehicle.commands;
 
-import clay.vehicle.dataStorage.PgStoreManager;
+import clay.vehicle.dataStorage.DbStoreManager;
 import clay.vehicle.dataStorage.Storage;
 import java.sql.SQLException;
 
@@ -13,14 +13,14 @@ public class Clear implements Executable {
   /** The storage instance to be cleared */
   Storage storage;
 
-  PgStoreManager manager;
+  DbStoreManager manager;
 
   /**
    * Constructs a new Clear command with the specified storage.
    *
    * @param storage the storage to be cleared
    */
-  public Clear(Storage storage, PgStoreManager manager) {
+  public Clear(Storage storage, DbStoreManager manager) {
     this.storage = storage;
     this.manager = manager;
   }

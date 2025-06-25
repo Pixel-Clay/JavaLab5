@@ -16,7 +16,7 @@ import lombok.Setter;
  */
 public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
 
-  private final PgStoreManager db;
+  private final DbStoreManager db;
   private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
   /** The initialization date of this storage */
@@ -26,7 +26,7 @@ public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
   @Getter @Setter private Map<Integer, Vehicle> storage = new HashMap<>();
 
   /** Constructs a new VehicleStorage with the current date and time as initialization date. */
-  public VehicleStorage(PgStoreManager db) {
+  public VehicleStorage(DbStoreManager db) {
     this.initDate = ZonedDateTime.now();
     this.db = db;
   }
@@ -193,7 +193,8 @@ public class VehicleStorage implements Storage, Comparable<VehicleStorage> {
     }
   }
 
-  void clearLocalCollection() {
+  @Override
+  public void clearLocalCollection() {
     lock.writeLock().lock();
     try {
       this.storage = new HashMap<>();

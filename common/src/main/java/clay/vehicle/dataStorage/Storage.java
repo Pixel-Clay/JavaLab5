@@ -15,6 +15,8 @@ public interface Storage {
 
   Vehicle removeKey(int id) throws SQLException;
 
+  void clearLocalCollection();
+
   void updateElement(int id, Vehicle vehicle) throws SQLException;
 
   String getType();

@@ -44,7 +44,7 @@ public class Vehicle implements Comparable<Vehicle> {
   @NotNull private FuelType fuelType;
 
   /** User ID of the vehicle. Cannot be null. */
-  @NotNull private Integer userId;
+  @NotNull private int userId;
 
   /**
    * Constructs a new Vehicle with the specified attributes.

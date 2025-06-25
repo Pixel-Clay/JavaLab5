@@ -1,10 +1,7 @@
 package clay.vehicle;
 
 import clay.vehicle.commands.*;
-import clay.vehicle.dataStorage.EnvPathRetriever;
-import clay.vehicle.dataStorage.NoEnvVarFoundException;
-import clay.vehicle.dataStorage.PgStoreManager;
-import clay.vehicle.dataStorage.VehicleStorage;
+import clay.vehicle.dataStorage.*;
 import clay.vehicle.networking.OnReadExecutionCallback;
 import clay.vehicle.networking.ServerNetworkingManager;
 import java.io.FileInputStream;
@@ -67,15 +64,25 @@ public class Main {
       System.exit(-3);
     }
 
-    String jdbcUrl = "jdbc:postgresql://localhost:5432/studs";
-    PgStoreManager db = new PgStoreManager();
+    String jdbcUrl = info.getProperty("jdbcURL");
+    if (jdbcUrl == null) {
+      logger.error("Database URL not specified. Exiting...");
+      System.exit(-4);
+    }
+
+    DbStoreManager db = new PgStoreManager();
     try {
       db.connect(jdbcUrl, info);
       newStorage = new VehicleStorage(db);
-      db.syncFromDB(newStorage);
     } catch (SQLException e) {
       logger.error("Could not connect to database: " + e.getMessage() + ". Exiting...");
-      System.exit(-3);
+      System.exit(-5);
+    }
+    try {
+      db.syncFromDB(newStorage);
+    } catch (SQLException e) {
+      logger.error("Failed to sync from db: " + e.getMessage());
+      System.exit(-69);
     }
 
     logger.info(
@@ -113,13 +120,15 @@ public class Main {
       SignalHandler handler =
           signal -> {
             logger.info("Ctrl+C detected.");
+            logger.info("Stopping server...");
+            networkingManager.stop();
+
             try {
               db.disconnect();
             } catch (SQLException e) {
               logger.warn("Could not disconnect from db: " + e.getMessage());
             }
-            logger.info("Stopping server...");
-            networkingManager.stop();
+
             logger.info("Closing process...");
             System.exit(0); // Exit the program
           };
@@ -131,11 +140,11 @@ public class Main {
 
     } catch (BindException e) {
       logger.error("Specified port in use, try another one. Exiting...");
-      System.exit(-5);
+      System.exit(-6);
     } catch (IOException e) {
       logger.error("Critical IO exception: " + e);
       logger.error("Exiting...");
-      System.exit(-6);
+      System.exit(-7);
     }
   }
 }
