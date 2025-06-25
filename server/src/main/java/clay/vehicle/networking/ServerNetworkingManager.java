@@ -24,7 +24,6 @@ public class ServerNetworkingManager {
   private static final Logger logger = LogManager.getLogger(ServerNetworkingManager.class);
 
   @Setter private ServerProcessingCallback readCallback;
-  @Setter private ServerProcessingCallback writeCallback;
 
   public ServerNetworkingManager(int port) {
     this.port = port;
@@ -43,7 +42,7 @@ public class ServerNetworkingManager {
   }
 
   public void run() throws IOException {
-    logger.info("Server running on port " + String.valueOf(getRunningPort()));
+    logger.info("Server running on port " + getRunningPort());
     Set<SelectionKey> selectedKeys;
     while (running) {
       selector.select();
@@ -111,7 +110,7 @@ public class ServerNetworkingManager {
       selector.close();
       channel.close();
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.error("IOException while stopping server: " + e.getMessage());
     }
   }
 
